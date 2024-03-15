@@ -6,14 +6,16 @@ import WorkoutDays from './screens/WorkoutDays';
 import WorkoutLogger from './screens/WorkoutLogger';
 import StatsScreen from './screens/StatsScreen';
 import { useCallback, useEffect } from 'react';
-import dbConnection from './utils/db-service';
+import openDatabase from './utils/db-service';
+
 
 const Stack = createNativeStackNavigator();
 
-export default function App() {
+export default function App() {   
 
   useEffect(() => {
-    console.log(dbConnection)
+    const db = openDatabase('/Users/valentinobalatti/projects/mobile/gymApp/assets/database.db');
+
   }, [])
 
   return (
