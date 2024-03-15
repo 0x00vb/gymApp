@@ -34,7 +34,15 @@ const WorkoutLogger = (props) => {
     }
 
     const hanldeAddDay = async () => {
-
+        try{
+            db.withTransactionAsync(async () => {
+                await db.runAsync('INSERT INTO WorkoutDays (workout_splits_id, workout_day_name) VALUES (?, ?)', [workoutSplit_id, dayInput])
+            });
+            await getWorkoutDays();
+            setModalVisible(false);
+        }catch(e){
+            console.log(e);
+        }
     }
 
     return(
@@ -68,6 +76,7 @@ const WorkoutLogger = (props) => {
                 placeholder={null}
                 modalVisible={modalVisible}
                 setModalVisible={setModalVisible}
+                onSubmit={hanldeAddDay}
             />
         </View>
 

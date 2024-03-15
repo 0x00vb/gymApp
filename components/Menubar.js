@@ -8,10 +8,13 @@ const Menubar = () => {
     return(
         <View style={styles.menubarContainer}>
             <TouchableOpacity onPress={() => navigation.navigate('Workouts')}>
-                <Icon name="barbell" size={31} color={'#f1f1f1'}/>
+                <Icon name="barbell" size={38} color={'#f1f1f1'}/>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('Stats')}>
-                <Icon name="stats-chart" size={31} color={'#f1f1f1'}/>
+                <Icon name="stats-chart" size={38} color={'#f1f1f1'}/>
+            </TouchableOpacity>
+            <TouchableOpacity>
+                <Icon name="map" size={38} color={'#f1f1f1'}/>
             </TouchableOpacity>
         </View>
     )
@@ -22,14 +25,15 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 20,
         backgroundColor: '#2d2a2ad8',
-        width: 115,
+        width: 'auto',
         height: 45,
-        borderRadius: 20,
+        borderRadius: 40,
         alignSelf: 'center',
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'row',
-        gap: 15
+        paddingHorizontal: 15,
+        gap: 20
     }
 
 })

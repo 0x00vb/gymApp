@@ -1,9 +1,14 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import Modal from 'react-native-modal';
 
 const LoggerModal = ({ modalVisible, setModalVisible }) => {
-    return(
+    const [date, setDate] = useState('');
+    const [sets, setSets] = useState();
+    const [weights, setWeights] = useState('');
+    const [reps, setReps] = useState('');
+
+    return(    
         <Modal
             isVisible={modalVisible}
             style={styles.modalView}
@@ -11,50 +16,60 @@ const LoggerModal = ({ modalVisible, setModalVisible }) => {
             animationIn={"slideInRight"}
             animationOut={'slideOutRight'}
         >
-            <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>Bench Press Log</Text>
-                <View style={styles.modalTable}>
-                    <View style={styles.rows}>
-                        <Text style={styles.rowText}>Date</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder={'DD/MM'}
-                            // onChangeText={(text) => setText(text)}
-                        />
-                    </View>
+            <KeyboardAvoidingView
+                style={{flex:0.6, justifyContent: 'center'}}
+                behavior={Platform.OS === 'ios' ? 'padding' : null}
+            >
 
-                    <View style={styles.rows}>
-                        <Text style={styles.rowText}>Sets</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder={'---'}
-                            // onChangeText={(text) => setText(text)}
-                        />
-                    </View>
+                <View style={styles.modalContainer}>
+                    <Text style={styles.modalTitle}>Bench Press Log</Text>
+                    <View style={styles.modalTable}>
+                        <View style={styles.rows}>
+                            <Text style={styles.rowText}>Date</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder={'DD/MM'}
+                                value={date}
+                                onChangeText={(text) => setDate(text)}
+                            />
+                        </View>
 
-                    <View style={styles.rows}>
-                        <Text style={styles.rowText}>Weight</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder={"---/---/---"}
-                            // onChangeText={(text) => setText(text)}
-                        />
-                    </View>
+                        <View style={styles.rows}>
+                            <Text style={styles.rowText}>Sets</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder={'---'}
+                                value={sets}
+                                onChangeText={(text) => setSets(text)}
+                            />
+                        </View>
 
-                    <View style={styles.rows}>
-                        <Text style={styles.rowText}>Reps</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder={"---/---/---"}
-                            // onChangeText={(text) => setText(text)}
-                        />
-                    </View>
+                        <View style={styles.rows}>
+                            <Text style={styles.rowText}>Weight</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder={"---/---/---"}
+                                value={weights}
+                                onChangeText={(text) => setWeights(text)}
+                            />
+                        </View>
 
+                        <View style={styles.rows}>
+                            <Text style={styles.rowText}>Reps</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder={"---/---/---"}
+                                value={reps}
+                                onChangeText={(text) => setWeights(text)}
+                            />
+                        </View>
+
+                    </View>
+                    <TouchableOpacity style={styles.submit} activeOpacity={0.6}>
+                        <Text style={{fontSize: 20, fontWeight: '700', color: '#F1F1F1'}}>Save log</Text>
+                    </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={styles.submit} activeOpacity={0.6}>
-                    <Text style={{fontSize: 20, fontWeight: '700', color: '#F1F1F1'}}>Save log</Text>
-                </TouchableOpacity>
-            </View>
+            </KeyboardAvoidingView>
         </Modal>
     )
 }

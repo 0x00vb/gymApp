@@ -71,7 +71,7 @@ const WorkoutSection = () => {
                         style={styles.input}
                         placeholder=""
                     />
-                    <TouchableOpacity onPress={() => handleAddWorkout()} style={styles.saveButton} activeOpacity={0.6}>
+                    <TouchableOpacity onPress={() => addWorkoutSplit()} style={styles.saveButton} activeOpacity={0.6}>
                         <Text style={{fontSize: 18, fontWeight: '700', color: '#f1f1f1'}}>Save workout</Text>
                     </TouchableOpacity>
                 </View>

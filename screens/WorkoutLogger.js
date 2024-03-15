@@ -10,6 +10,7 @@ import { useSQLiteContext } from "expo-sqlite/next";
 const WorkoutLogger = (props) => {
     const { title, subtitle, workoutDay_id } = props.route.params;
     const [exercises, setExercises] = useState([]);
+    const [exerciseLogs, setExerciseLogs] = useState([]);
     const [expandedCard, setExpandedCard] = useState(null);
     const [addExerciseModalVisible, setAddExerciseModalVisible] = useState(false);
     const [exerciseText, setExerciseText] = useState("");
@@ -27,6 +28,12 @@ const WorkoutLogger = (props) => {
         setExercises(response);
     }
 
+    const getExerciseLogs = async (exercise_id) => {
+        const response = await db.getAllAsync('SELECT * FROM Logs WHERE exercise_id = ?', [exercise_id]);
+        setExerciseLogs([]);
+        setExerciseLogs(response);
+    }
+
     const toggleAddExerciseModal = () => {
         setAddExerciseModalVisible(true);
     }
@@ -37,8 +44,21 @@ const WorkoutLogger = (props) => {
         setLogModalVisible(true);
     }
 
-    const hanldeCardPress = (cardIndex) => {
-        setExpandedCard(expandedCard === cardIndex ? null : cardIndex);
+    const hanldeCardPress = async (cardId) => {
+        await getExerciseLogs(cardId);
+        setExpandedCard(cardId === expandedCard ? null : cardId);
+    }
+
+    const handleAddExercise = async () => {
+        try{    
+            db.withTransactionAsync(async () => {
+                await db.runAsync('INSERT INTO Exercises (workout_day_id, exercise_name) VALUES (?, ?)', [workoutDay_id, exerciseText]);
+            });
+            await getExercises();
+            setAddExerciseModalVisible(false);
+        }catch(e){
+            console.log(e);
+        }
     }
 
     return(
@@ -46,11 +66,11 @@ const WorkoutLogger = (props) => {
             <Topbar title={title} subtitle={subtitle}/>
             <ScrollView contentContainerStyle={styles.workoutsList}>
                 {
-                    exercises.map((item) => (
-                        <TouchableOpacity style={styles.workoutCard} activeOpacity={0.6} onPress={() => hanldeCardPress(1)} key={item.id}>
+                    exercises.map((item, index) => (
+                        <TouchableOpacity style={styles.workoutCard} activeOpacity={0.6} onPress={() => hanldeCardPress(item.id - 1)} key={item.id}>
                             <Text style={styles.workoutTitle}>{item.exercise_name}</Text>
                             {
-                                expandedCard === 1 && (
+                                expandedCard === index && (
                                     <View>
                                         <View style={styles.workoutCardExpandedGridContainer}>
                                             <View style={styles.gridHeader}>
@@ -60,12 +80,16 @@ const WorkoutLogger = (props) => {
                                                 <Text style={styles.gridHeaderText}>Reps</Text>
                                             </View>
                                             <ScrollView contentContainerStyle={styles.gridList}>
-                                                <TouchableOpacity style={styles.workoutRow}>
-                                                    <Text style={styles.workoutRowText}>10/10/2023</Text>
-                                                    <Text style={styles.workoutRowText}>3</Text>
-                                                    <Text style={styles.workoutRowText}>100kg</Text>
-                                                    <Text style={styles.workoutRowText}>12-12-12</Text>
-                                                </TouchableOpacity>
+                                                {
+                                                    exerciseLogs.map((item) => (
+                                                        <TouchableOpacity style={styles.workoutRow} key={item.id}>
+                                                            <Text style={styles.workoutRowText}>{item.date}</Text>
+                                                            <Text style={styles.workoutRowText}>{item.sets}</Text>
+                                                            <Text style={styles.workoutRowText}>{item.weights}</Text>
+                                                            <Text style={styles.workoutRowText}>{item.reps}</Text>
+                                                        </TouchableOpacity>
+                                                    ))
+                                                }
                                             </ScrollView>
                                         </View>
                                         <TouchableOpacity style={styles.addWorkout} onPress={toggleLogModal}>
@@ -87,9 +111,7 @@ const WorkoutLogger = (props) => {
             <LoggerModal
                 modalVisible={LogModalVisible}
                 setModalVisible={setLogModalVisible}
-                
             />
-
             <ModalInput
                 title={"Add Exercise"}
                 buttonText={'Save exercise'}
@@ -98,6 +120,7 @@ const WorkoutLogger = (props) => {
                 inputValue={exerciseText}
                 modalVisible={addExerciseModalVisible}
                 setModalVisible={setAddExerciseModalVisible}    
+                onSubmit={handleAddExercise}
             /> 
         </View>
 
@@ -147,12 +170,14 @@ const styles = StyleSheet.create({
     workoutCardExpandedGridContainer: {
         alignSelf: 'center',
         backgroundColor: '#f1f1f1',
-        height: 400,
+        maxHeight: 400,
+        height: 'auto',
         width: '98%',
+        paddingBottom: 10,
         borderRadius: 10
     },
     gridHeader: {
-        flexDirection: 'row',
+        flexDirection: 'row',   
         justifyContent: 'center',
         gap: 50,
         marginVertical: 7,     
@@ -166,7 +191,6 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         justifyContent: 'center',
         gap: 9
-
     },
     workoutRow: {
         height: 40,
