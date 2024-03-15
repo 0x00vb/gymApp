@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import Modal from 'react-native-modal';
 import { useNavigation } from "@react-navigation/native";
@@ -6,13 +6,28 @@ import { useNavigation } from "@react-navigation/native";
 import Topbar from "../components/Topbar";
 import ModalInput from '../components/ModalInput'
 import Icon from "react-native-vector-icons/FontAwesome";
+import { useSQLiteContext } from "expo-sqlite/next";
 
 const WorkoutLogger = (props) => {
-    const {title} = props.route.params;
+    const { title, workoutSplit_id } = props.route.params;
+    const [workoutDays, setWorkoutDays] = useState([]);
     const navigation = useNavigation();
 
     const [modalVisible, setModalVisible] = useState(false);
     const [dayInput, setDayInput] = useState('');
+
+    const db = useSQLiteContext();
+
+    useEffect(() => {
+        db.withTransactionAsync(async () => {
+            await getWorkoutDays();
+        })
+    }, [])
+    
+    const getWorkoutDays = async () => {
+        const response = await db.getAllAsync('SELECT * FROM WorkoutDays WHERE workout_splits_id = ?', [workoutSplit_id]);
+        setWorkoutDays(response);
+    }
 
     const toggleModal = () => {
         setModalVisible(true);
@@ -26,10 +41,13 @@ const WorkoutLogger = (props) => {
         <View>
             <Topbar title={title}/>
             <ScrollView contentContainerStyle={styles.workoutsList}>
-
-                <TouchableOpacity style={styles.workoutCard} activeOpacity={0.6} onPress={() => navigation.navigate('WorkoutLogger', {title: title, subtitle: "Push day"})}>
-                    <Text style={styles.workoutTitle}>Push day</Text>
-                </TouchableOpacity>
+                {
+                    workoutDays.map((item) => (
+                        <TouchableOpacity style={styles.workoutCard} activeOpacity={0.6} onPress={() => navigation.navigate('WorkoutLogger', {title: title, subtitle: "Push day"})} key={item.id}>
+                            <Text style={styles.workoutTitle}>{item.workout_day_name}</Text>
+                        </TouchableOpacity>
+                    ))
+                }
 
 
                 {/* -------  */}
