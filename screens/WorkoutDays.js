@@ -43,7 +43,11 @@ const WorkoutLogger = (props) => {
             <ScrollView contentContainerStyle={styles.workoutsList}>
                 {
                     workoutDays.map((item) => (
-                        <TouchableOpacity style={styles.workoutCard} activeOpacity={0.6} onPress={() => navigation.navigate('WorkoutLogger', {title: title, subtitle: "Push day"})} key={item.id}>
+                        <TouchableOpacity
+                            style={styles.workoutCard}
+                            activeOpacity={0.6}
+                            onPress={() => navigation.navigate('WorkoutLogger', {title: title, subtitle: item.workout_day_name, workoutDay_id: item.id})}
+                            key={item.id}>
                             <Text style={styles.workoutTitle}>{item.workout_day_name}</Text>
                         </TouchableOpacity>
                     ))

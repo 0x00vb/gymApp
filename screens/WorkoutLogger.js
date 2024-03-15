@@ -1,17 +1,31 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import Modal from 'react-native-modal';
 import Topbar from "../components/Topbar";
 import Icon from "react-native-vector-icons/FontAwesome";
 import ModalInput from "../components/ModalInput";
 import LoggerModal from "../components/LoggerModal";
+import { useSQLiteContext } from "expo-sqlite/next";
 
 const WorkoutLogger = (props) => {
-    const {title, subtitle} = props.route.params;
+    const { title, subtitle, workoutDay_id } = props.route.params;
+    const [exercises, setExercises] = useState([]);
     const [expandedCard, setExpandedCard] = useState(null);
-
     const [addExerciseModalVisible, setAddExerciseModalVisible] = useState(false);
     const [exerciseText, setExerciseText] = useState("");
+    
+    const db = useSQLiteContext();
+
+    useEffect(() => {
+        db.withTransactionAsync(async () => {
+            await getExercises();
+        })
+    }, [])
+
+    const getExercises = async () => {
+        const response = await db.getAllAsync('SELECT * FROM Exercises WHERE workout_day_id = ?', [workoutDay_id]);
+        setExercises(response);
+    }
 
     const toggleAddExerciseModal = () => {
         setAddExerciseModalVisible(true);
@@ -23,7 +37,6 @@ const WorkoutLogger = (props) => {
         setLogModalVisible(true);
     }
 
-
     const hanldeCardPress = (cardIndex) => {
         setExpandedCard(expandedCard === cardIndex ? null : cardIndex);
     }
@@ -32,98 +45,38 @@ const WorkoutLogger = (props) => {
         <View>
             <Topbar title={title} subtitle={subtitle}/>
             <ScrollView contentContainerStyle={styles.workoutsList}>
-
-                <TouchableOpacity style={styles.workoutCard} activeOpacity={0.6} onPress={() => hanldeCardPress(1)}>
-                    <Text style={styles.workoutTitle}>Bench Press</Text>
-                    {
-                        expandedCard === 1 && (
-                            <View>
-                                <View style={styles.workoutCardExpandedGridContainer}>
-                                    <View style={styles.gridHeader}>
-                                        <Text style={styles.gridHeaderText}>Date</Text>
-                                        <Text style={styles.gridHeaderText}>Sets</Text>
-                                        <Text style={styles.gridHeaderText}>Weight</Text>
-                                        <Text style={styles.gridHeaderText}>Reps</Text>
+                {
+                    exercises.map((item) => (
+                        <TouchableOpacity style={styles.workoutCard} activeOpacity={0.6} onPress={() => hanldeCardPress(1)} key={item.id}>
+                            <Text style={styles.workoutTitle}>{item.exercise_name}</Text>
+                            {
+                                expandedCard === 1 && (
+                                    <View>
+                                        <View style={styles.workoutCardExpandedGridContainer}>
+                                            <View style={styles.gridHeader}>
+                                                <Text style={styles.gridHeaderText}>Date</Text>
+                                                <Text style={styles.gridHeaderText}>Sets</Text>
+                                                <Text style={styles.gridHeaderText}>Weight</Text>
+                                                <Text style={styles.gridHeaderText}>Reps</Text>
+                                            </View>
+                                            <ScrollView contentContainerStyle={styles.gridList}>
+                                                <TouchableOpacity style={styles.workoutRow}>
+                                                    <Text style={styles.workoutRowText}>10/10/2023</Text>
+                                                    <Text style={styles.workoutRowText}>3</Text>
+                                                    <Text style={styles.workoutRowText}>100kg</Text>
+                                                    <Text style={styles.workoutRowText}>12-12-12</Text>
+                                                </TouchableOpacity>
+                                            </ScrollView>
+                                        </View>
+                                        <TouchableOpacity style={styles.addWorkout} onPress={toggleLogModal}>
+                                            <Icon name="plus" size={30} color={'#f1f1f1'}/>
+                                        </TouchableOpacity>
                                     </View>
-                                    <ScrollView contentContainerStyle={styles.gridList}>
-
-                                        <TouchableOpacity style={styles.workoutRow}>
-                                            <Text style={styles.workoutRowText}>10/10/2023</Text>
-                                            <Text style={styles.workoutRowText}>3</Text>
-                                            <Text style={styles.workoutRowText}>100kg</Text>
-                                            <Text style={styles.workoutRowText}>12-12-12</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity style={styles.workoutRow}>
-                                            <Text style={styles.workoutRowText}>10/10/2023</Text>
-                                            <Text style={styles.workoutRowText}>3</Text>
-                                            <Text style={styles.workoutRowText}>100kg</Text>
-                                            <Text style={styles.workoutRowText}>12-12-12</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity style={styles.workoutRow}>
-                                            <Text style={styles.workoutRowText}>10/10/2023</Text>
-                                            <Text style={styles.workoutRowText}>3</Text>
-                                            <Text style={styles.workoutRowText}>100kg</Text>
-                                            <Text style={styles.workoutRowText}>12-12-12</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity style={styles.workoutRow}>
-                                            <Text style={styles.workoutRowText}>10/10/2023</Text>
-                                            <Text style={styles.workoutRowText}>3</Text>
-                                            <Text style={styles.workoutRowText}>100kg</Text>
-                                            <Text style={styles.workoutRowText}>12-12-12</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity style={styles.workoutRow}>
-                                            <Text style={styles.workoutRowText}>10/10/2023</Text>
-                                            <Text style={styles.workoutRowText}>3</Text>
-                                            <Text style={styles.workoutRowText}>100kg</Text>
-                                            <Text style={styles.workoutRowText}>12-12-12</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity style={styles.workoutRow}>
-                                            <Text style={styles.workoutRowText}>10/10/2023</Text>
-                                            <Text style={styles.workoutRowText}>3</Text>
-                                            <Text style={styles.workoutRowText}>100kg</Text>
-                                            <Text style={styles.workoutRowText}>12-12-12</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity style={styles.workoutRow}>
-                                            <Text style={styles.workoutRowText}>10/10/2023</Text>
-                                            <Text style={styles.workoutRowText}>3</Text>
-                                            <Text style={styles.workoutRowText}>100kg</Text>
-                                            <Text style={styles.workoutRowText}>12-12-12</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity style={styles.workoutRow}>
-                                            <Text style={styles.workoutRowText}>10/10/2023</Text>
-                                            <Text style={styles.workoutRowText}>3</Text>
-                                            <Text style={styles.workoutRowText}>100kg</Text>
-                                            <Text style={styles.workoutRowText}>12-12-12</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity style={styles.workoutRow}>
-                                            <Text style={styles.workoutRowText}>10/10/2023</Text>
-                                            <Text style={styles.workoutRowText}>3</Text>
-                                            <Text style={styles.workoutRowText}>100kg</Text>
-                                            <Text style={styles.workoutRowText}>12-12-12</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity style={styles.workoutRow}>
-                                            <Text style={styles.workoutRowText}>10/10/2023</Text>
-                                            <Text style={styles.workoutRowText}>3</Text>
-                                            <Text style={styles.workoutRowText}>100kg</Text>
-                                            <Text style={styles.workoutRowText}>12-12-12</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity style={styles.workoutRow}>
-                                            <Text style={styles.workoutRowText}>10/10/2023</Text>
-                                            <Text style={styles.workoutRowText}>3</Text>
-                                            <Text style={styles.workoutRowText}>100kg</Text>
-                                            <Text style={styles.workoutRowText}>12-12-12</Text>
-                                        </TouchableOpacity>
-
-
-                                    </ScrollView>
-                                </View>
-                                <TouchableOpacity style={styles.addWorkout} onPress={toggleLogModal}>
-                                    <Icon name="plus" size={30} color={'#f1f1f1'}/>
-                                </TouchableOpacity>
-                            </View>
-                        )
-                    }
-                </TouchableOpacity>
+                                )
+                            }
+                        </TouchableOpacity>
+                    ))
+                }
 
 
                 {/* -------  */}
