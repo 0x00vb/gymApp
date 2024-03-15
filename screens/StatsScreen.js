@@ -6,4 +6,8 @@ const StatsScreen = () => {
 
 }
 
+const styles = StyleSheet.create({
+    
+})
+
 export default StatsScreen;
