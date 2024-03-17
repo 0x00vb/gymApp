@@ -13,7 +13,7 @@ const Menubar = () => {
             <TouchableOpacity onPress={() => navigation.navigate('Stats')}>
                 <Icon name="stats-chart" size={38} color={'#f1f1f1'}/>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('GymsMap')}>
                 <Icon name="map" size={38} color={'#f1f1f1'}/>
             </TouchableOpacity>
         </View>
