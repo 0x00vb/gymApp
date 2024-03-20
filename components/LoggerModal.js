@@ -60,7 +60,7 @@ const LoggerModal = ({ modalVisible, setModalVisible }) => {
                                 style={styles.input}
                                 placeholder={"---/---/---"}
                                 value={reps}
-                                onChangeText={(text) => setWeights(text)}
+                                onChangeText={(text) => setReps(text)}
                             />
                         </View>
 
