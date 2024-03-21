@@ -14,6 +14,7 @@ const WorkoutLogger = (props) => {
     const [expandedCard, setExpandedCard] = useState(null);
     const [addExerciseModalVisible, setAddExerciseModalVisible] = useState(false);
     const [exerciseText, setExerciseText] = useState("");
+    const [selectedExerciseId, setSelectedExerciseId] = useState();
     
     const db = useSQLiteContext();
 
@@ -40,13 +41,14 @@ const WorkoutLogger = (props) => {
 
     const [LogModalVisible, setLogModalVisible] = useState(false);
 
-    const toggleLogModal = () => {
+    const toggleLogModal = (exerciseId) => {
+        setSelectedExerciseId(exerciseId);
         setLogModalVisible(true);
     }
 
     const hanldeCardPress = async (cardId) => {
         await getExerciseLogs(cardId);
-        setExpandedCard(cardId === expandedCard ? null : cardId);
+        setExpandedCard((cardId - 1) === expandedCard ? null : (cardId - 1));
     }
 
     const handleAddExercise = async () => {
@@ -67,7 +69,7 @@ const WorkoutLogger = (props) => {
             <ScrollView contentContainerStyle={styles.workoutsList}>
                 {
                     exercises.map((item, index) => (
-                        <TouchableOpacity style={styles.workoutCard} activeOpacity={0.6} onPress={() => hanldeCardPress(item.id - 1)} key={item.id}>
+                        <TouchableOpacity style={styles.workoutCard} activeOpacity={0.6} onPress={() => hanldeCardPress(item.id)} key={item.id}>
                             <Text style={styles.workoutTitle}>{item.exercise_name}</Text>
                             {
                                 expandedCard === index && (
@@ -92,7 +94,7 @@ const WorkoutLogger = (props) => {
                                                 }
                                             </ScrollView>
                                         </View>
-                                        <TouchableOpacity style={styles.addWorkout} onPress={toggleLogModal}>
+                                        <TouchableOpacity style={styles.addWorkout} onPress={() => toggleLogModal(item.id)}>
                                             <Icon name="plus" size={30} color={'#f1f1f1'}/>
                                         </TouchableOpacity>
                                     </View>
@@ -111,6 +113,8 @@ const WorkoutLogger = (props) => {
             <LoggerModal
                 modalVisible={LogModalVisible}
                 setModalVisible={setLogModalVisible}
+                exerciseId={selectedExerciseId}
+                getExerciseLogs={getExerciseLogs}
             />
             <ModalInput
                 title={"Add Exercise"}

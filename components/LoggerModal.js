@@ -1,18 +1,44 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import Modal from 'react-native-modal';
+import { useSQLiteContext } from "expo-sqlite/next";
 
-const LoggerModal = ({ modalVisible, setModalVisible }) => {
+const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, getExerciseLogs }) => {
     const [date, setDate] = useState('');
     const [sets, setSets] = useState();
     const [weights, setWeights] = useState('');
     const [reps, setReps] = useState('');
 
+    const db = useSQLiteContext();
+
+    const resetFields = () => {
+        setDate('');
+        setWeights('');
+        setSets('');
+        setReps('');
+    }
+
+    const handleSaveLog = async () => {
+        try{
+            db.withTransactionAsync(async () => {
+                await db.runAsync(
+                    'INSERT INTO Logs (exercise_id, date, weights, sets, reps) VALUES (?, ?, ?, ?, ?)',
+                    [exerciseId, date, weights, sets, reps]
+                );
+            })
+            getExerciseLogs(exerciseId);
+            resetFields();
+            setModalVisible(false);
+        }catch(error){
+            console.log(error);
+        }
+    }
+
     return(    
         <Modal
             isVisible={modalVisible}
             style={styles.modalView}
-            onBackdropPress={() => setModalVisible(false)}
+            onBackdropPress={() => (setModalVisible(false), resetFields())}
             animationIn={"slideInRight"}
             animationOut={'slideOutRight'}
         >
@@ -65,7 +91,7 @@ const LoggerModal = ({ modalVisible, setModalVisible }) => {
                         </View>
 
                     </View>
-                    <TouchableOpacity style={styles.submit} activeOpacity={0.6}>
+                    <TouchableOpacity style={styles.submit} activeOpacity={0.6} onPress={handleSaveLog}>
                         <Text style={{fontSize: 20, fontWeight: '700', color: '#F1F1F1'}}>Save log</Text>
                     </TouchableOpacity>
                 </View>
