@@ -3,8 +3,16 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingVi
 import Modal from 'react-native-modal';
 import { useSQLiteContext } from "expo-sqlite/next";
 
+const getCurrentDate = () => {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = ('0' + (currentDate.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-based
+    const day = ('0' + currentDate.getDate()).slice(-2);
+    return `${year}/${month}/${day}`;
+};
+
 const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, getExerciseLogs }) => {
-    const [date, setDate] = useState('');
+    const [date, setDate] = useState(getCurrentDate());
     const [sets, setSets] = useState();
     const [weights, setWeights] = useState('');
     const [reps, setReps] = useState('');
