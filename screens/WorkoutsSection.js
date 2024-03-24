@@ -3,6 +3,7 @@ import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput } from 
 import Modal from 'react-native-modal'
 import { useNavigation } from "@react-navigation/native";
 import { useSQLiteContext } from "expo-sqlite/next";
+import Icon from "react-native-vector-icons/Ionicons";
 
 import Topbar from "../components/Topbar";
 
@@ -10,6 +11,7 @@ const WorkoutSection = () => {
     const [workoutSplits, setWorkoutSplits] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [newWorkoutSplit, setNewWorkoutSplit] = useState("");
+    const [longPressed, setLongPressed] = useState(null);
     const navigation = useNavigation();
 
     const db = useSQLiteContext();
@@ -42,16 +44,39 @@ const WorkoutSection = () => {
         }
     }
 
+    const removeWorkoutSplit = () => {
+        
+    }
+
+    const handleLongTouch = (itemId) => {
+        setLongPressed(itemId);
+    }
+
     return(
         <View>
             <Topbar title={'Workouts'} setModalVisible={setModalVisible}/>
             <ScrollView contentContainerStyle={styles.workoutsList}>
 
                 {
-                    workoutSplits.map((item) => (
-                        <TouchableOpacity style={styles.workoutSplitCard} activeOpacity={0.7} onPress={() => hanldeCardPress(item.workout_split_name, item.id)} key={item.id}>
+                    workoutSplits.map((item, index) => (
+                        <TouchableOpacity
+                            style={[styles.workoutSplitCard, longPressed === index && styles.longPressedSpan]}
+                            activeOpacity={0.7}
+                            onPress={() => hanldeCardPress(item.workout_split_name, item.id)} key={item.id}
+                            onLongPress={() => handleLongTouch(index)}
+                        >
                             <Text style={styles.workoutSplitTitle}>{item.workout_split_name}</Text>
                             <Text style={styles.workoutSplitFrec}>6 days/week</Text>
+                            {
+                                longPressed === index && (
+                                    <TouchableOpacity
+                                        style={styles.trashIconContainer}
+                                        onPress={null}
+                                    >
+                                        <Icon name='trash' size={28} color={'#aa1212'}/>
+                                    </TouchableOpacity>
+                                )
+                            }
                         </TouchableOpacity>
 
                     ))
@@ -88,7 +113,7 @@ const styles = StyleSheet.create({
         gap: 24
     },
     workoutSplitCard: {
-        width: 340,
+        width: '83%',
         height: 80,
         backgroundColor: '#D9D9D9',
         borderRadius: 10,
@@ -136,6 +161,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 10,
         borderRadius: 10
+    },
+    longPressedSpan: {
+        borderColor: '#aa1212',
+        borderWidth: 2,
+    },
+    trashIconContainer: {
+        position: 'absolute',
+        top: '30%',
+        right: 10
     }
 })
 

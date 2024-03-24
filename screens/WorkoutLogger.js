@@ -49,8 +49,6 @@ const WorkoutLogger = (props) => {
 
     const hanldeCardPress = async (cardIndex, cardId) => {
         await getExerciseLogs(cardId);
-        console.log(exercises)
-        console.log(cardIndex)
         setExpandedCard((cardIndex) === expandedCard ? null : (cardIndex));
     }
 
