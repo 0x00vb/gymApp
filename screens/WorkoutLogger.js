@@ -47,9 +47,11 @@ const WorkoutLogger = (props) => {
         setLogModalVisible(true);
     }
 
-    const hanldeCardPress = async (cardId) => {
+    const hanldeCardPress = async (cardIndex, cardId) => {
         await getExerciseLogs(cardId);
-        setExpandedCard((cardId - 1) === expandedCard ? null : (cardId - 1));
+        console.log(exercises)
+        console.log(cardIndex)
+        setExpandedCard((cardIndex) === expandedCard ? null : (cardIndex));
     }
 
     const handleAddExercise = async () => {
@@ -70,7 +72,7 @@ const WorkoutLogger = (props) => {
             <ScrollView contentContainerStyle={styles.workoutsList}>
                 {
                     exercises.map((item, index) => (
-                        <TouchableOpacity style={styles.workoutCard} activeOpacity={0.6} onPress={() => hanldeCardPress(item.id)} key={item.id}>
+                        <TouchableOpacity style={styles.workoutCard} activeOpacity={0.6} onPress={() => hanldeCardPress(index, item.id)} key={item.id}>
                             <Text style={styles.workoutTitle}>{item.exercise_name}</Text>
                             {
                                 expandedCard === index && (
@@ -84,6 +86,11 @@ const WorkoutLogger = (props) => {
                                             </View>
                                             <ScrollView contentContainerStyle={styles.gridList}>
                                                 {
+                                                    exerciseLogs.length === 0 ? 
+                                                        <Text style={{alignSelf: 'center', fontSize: 17, color: '#808080'}}>
+                                                            No logs found...
+                                                        </Text> 
+                                                    :
                                                     exerciseLogs.map((item) => (
                                                         <TouchableOpacity style={styles.workoutRow} key={item.id}>
                                                             <Text style={styles.workoutRowText}>{item.date}</Text>

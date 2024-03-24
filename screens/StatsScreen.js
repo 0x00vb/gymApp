@@ -5,6 +5,7 @@ import Topbar from "../components/Topbar";
 import Icon from "react-native-vector-icons/Ionicons";
 import Icon2 from "react-native-vector-icons/MaterialCommunityIcons";
 import RMcalculator from "../components/RMcalculator";
+import ProgressChart from "../components/ProgessChart";
 
 const StatsScreen = () => {
     const [RMcalcVisible, setRMcalcVisible] = useState(false);
@@ -32,6 +33,8 @@ const StatsScreen = () => {
                     </View>
 
                 </View>
+
+                <ProgressChart/>
 
                 <TouchableOpacity style={styles.RMcalcWidget} onPress={() => setRMcalcVisible(true)}>
                     <Icon2 name="weight-lifter" size={34} color={'#21212'}/>
@@ -74,14 +77,18 @@ const styles = StyleSheet.create({
         color: '#217EC2',
         textShadowColor: 'rgba(0, 0, 0, 0.25)',
         textShadowOffset: {width: -0.2, height: 0.2},
-        textShadowRadius: 10
+        textShadowRadius: 10,
+        marginTop: 5,
+        marginBottom: 10
     },
     widgetSpan: {
-        backgroundColor: '#F1F1F1',
+        backgroundColor: '#F9F1F9',
         padding: 5,
         borderRadius: 100,
         aspectRatio: '1/1',
         alignItems: 'center',
+        shadowColor: 'rgba(0, 0, 0, 0.75)',
+        elevation: 7,
     },
     RMcalcWidget: {
         flexDirection: 'row',
