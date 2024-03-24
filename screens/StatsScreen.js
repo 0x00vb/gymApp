@@ -9,7 +9,6 @@ import RMcalculator from "../components/RMcalculator";
 const StatsScreen = () => {
     const [RMcalcVisible, setRMcalcVisible] = useState(false);
 
-
     return(
         <View>
             <Topbar title={"Statistics"}/>

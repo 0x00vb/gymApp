@@ -11,7 +11,7 @@ const getCurrentDate = () => {
     return `${year}/${month}/${day}`;
 };
 
-const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, getExerciseLogs }) => {
+const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, getExerciseLogs }) => {
     const [date, setDate] = useState(getCurrentDate());
     const [sets, setSets] = useState();
     const [weights, setWeights] = useState('');
@@ -20,7 +20,7 @@ const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, getExerciseLog
     const db = useSQLiteContext();
 
     const resetFields = () => {
-        setDate('');
+        setDate(getCurrentDate());
         setWeights('');
         setSets('');
         setReps('');
@@ -56,7 +56,7 @@ const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, getExerciseLog
             >
 
                 <View style={styles.modalContainer}>
-                    <Text style={styles.modalTitle}>Bench Press Log</Text>
+                    <Text style={styles.modalTitle}>{exerciseName} Log</Text>
                     <View style={styles.modalTable}>
                         <View style={styles.rows}>
                             <Text style={styles.rowText}>Date</Text>

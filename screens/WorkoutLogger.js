@@ -15,6 +15,7 @@ const WorkoutLogger = (props) => {
     const [addExerciseModalVisible, setAddExerciseModalVisible] = useState(false);
     const [exerciseText, setExerciseText] = useState("");
     const [selectedExerciseId, setSelectedExerciseId] = useState();
+    const [selectedExerciseName, setSelectedExerciseName] = useState();
     
     const db = useSQLiteContext();
 
@@ -94,7 +95,9 @@ const WorkoutLogger = (props) => {
                                                 }
                                             </ScrollView>
                                         </View>
-                                        <TouchableOpacity style={styles.addWorkout} onPress={() => toggleLogModal(item.id)}>
+                                        <TouchableOpacity
+                                            style={styles.addWorkout}
+                                            onPress={() => {toggleLogModal(item.id), setSelectedExerciseName(item.exercise_name)}}>
                                             <Icon name="plus" size={30} color={'#f1f1f1'}/>
                                         </TouchableOpacity>
                                     </View>
@@ -102,7 +105,7 @@ const WorkoutLogger = (props) => {
                             }
                         </TouchableOpacity>
                     ))
-                }
+                }   
 
 
                 {/* -------  */}
@@ -114,7 +117,9 @@ const WorkoutLogger = (props) => {
                 modalVisible={LogModalVisible}
                 setModalVisible={setLogModalVisible}
                 exerciseId={selectedExerciseId}
+                exerciseName={selectedExerciseName}
                 getExerciseLogs={getExerciseLogs}
+                setExerciseLogs={setExerciseLogs}
             />
             <ModalInput
                 title={"Add Exercise"}
