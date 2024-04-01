@@ -1,22 +1,26 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import Modal from 'react-native-modal';
 
 const ModalInput = ({ title, buttonText, setText, placeholder, inputValue, modalVisible, setModalVisible, onSubmit }) => {
     return(
         <Modal isVisible={modalVisible} style={styles.modalView} onBackdropPress={() => setModalVisible(false)}>
-            <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>{title}</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder={placeholder}
-                    value={inputValue}
-                    onChangeText={(text) => setText(text)}
-                />
-                <TouchableOpacity style={styles.submit} activeOpacity={0.6} onPress={onSubmit}>
-                    <Text style={{fontSize: 18, fontWeight: '700', color: '#F1F1F1'}}>{buttonText}</Text>
-                </TouchableOpacity>
-            </View>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : null}
+            >
+                <View style={styles.modalContainer}>
+                    <Text style={styles.modalTitle}>{title}</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder={placeholder}
+                        value={inputValue}
+                        onChangeText={(text) => setText(text)}
+                    />
+                    <TouchableOpacity style={styles.submit} activeOpacity={0.6} onPress={onSubmit}>
+                        <Text style={{fontSize: 18, fontWeight: '700', color: '#F1F1F1'}}>{buttonText}</Text>
+                    </TouchableOpacity>
+                </View>
+            </KeyboardAvoidingView>
         </Modal>
     )
 }

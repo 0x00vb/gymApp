@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import Modal from 'react-native-modal'
 import { useNavigation } from "@react-navigation/native";
 import { useSQLiteContext } from "expo-sqlite/next";
@@ -84,22 +84,26 @@ const WorkoutSection = () => {
 
             </ScrollView>
             <Modal isVisible={modalVisible} style={styles.modalView} onBackdropPress={() => setModalVisible(false)}>
-                <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>Add workout</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Workout name"
-                        value={newWorkoutSplit}
-                        onChangeText={(text) => setNewWorkoutSplit(text)}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder=""
-                    />
-                    <TouchableOpacity onPress={() => addWorkoutSplit()} style={styles.saveButton} activeOpacity={0.6}>
-                        <Text style={{fontSize: 18, fontWeight: '700', color: '#f1f1f1'}}>Save workout</Text>
-                    </TouchableOpacity>
-                </View>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : null}
+                >
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Add workout</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Workout name"
+                            value={newWorkoutSplit}
+                            onChangeText={(text) => setNewWorkoutSplit(text)}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder=""
+                        />
+                        <TouchableOpacity onPress={() => addWorkoutSplit()} style={styles.saveButton} activeOpacity={0.6}>
+                            <Text style={{fontSize: 18, fontWeight: '700', color: '#f1f1f1'}}>Save workout</Text>
+                        </TouchableOpacity>
+                    </View>
+                </KeyboardAvoidingView>
             </Modal>
         </View>
     )

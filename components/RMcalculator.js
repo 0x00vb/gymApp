@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import Modal from 'react-native-modal';
 
 const RMcalculator = ({ isVisible, setIsVisible }) => {
@@ -11,36 +11,43 @@ const RMcalculator = ({ isVisible, setIsVisible }) => {
     <Modal isVisible={isVisible}
         style={styles.modalView}
         onBackdropPress={() => setIsVisible(false)}
-        animationIn={'slideInDown'}
+        animationIn={'slideInUp'}
         animationOut={'slideOutDown'}
     >
-        <View style={styles.modalContent}>
-            <View style={{gap: 15, marginTop: 10}}>
-                <View style={styles.modalRows}>
-                    <Text style={styles.modalText}>Weight</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder=''
-                        value={weight}
-                        onChangeText={(w) => setWeight(w)}
-                        keyboardType='numeric'
-                    />
+        <KeyboardAvoidingView
+            style={{}}
+            behavior={Platform.OS === 'ios' ? 'padding' : null}
+        >
+
+            <View style={styles.modalContent}>
+                <View style={{gap: 15, marginTop: 10}}>
+                    <View style={styles.modalRows}>
+                        <Text style={styles.modalText}>Weight</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder=''
+                            value={weight}
+                            onChangeText={(w) => setWeight(w)}
+                            keyboardType='numeric'
+                        />
+                    </View>
+                    <View style={styles.modalRows}>
+                        <Text style={styles.modalText}>Reps</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder=''
+                            value={reps}
+                            onChangeText={(reps) => setReps(reps)}
+                            keyboardType='numeric'   
+                        />
+                    </View>
                 </View>
-                <View style={styles.modalRows}>
-                    <Text style={styles.modalText}>Reps</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder=''
-                        value={reps}
-                        onChangeText={(reps) => setReps(reps)}
-                        keyboardType='numeric'   
-                    />
-                </View>
+                <TouchableOpacity style={styles.modalButton} activeOpacity={0.6}>
+                    <Text style={{fontSize: 24, fontWeight: 'bold', color: '#F1F1F1'}}>Calculate 1RM</Text>
+                </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.modalButton} activeOpacity={0.6}>
-                <Text style={{fontSize: 24, fontWeight: 'bold', color: '#F1F1F1'}}>Calculate 1RM</Text>
-            </TouchableOpacity>
-        </View>
+
+        </KeyboardAvoidingView>
     </Modal>
   )
 }
@@ -59,18 +66,21 @@ const styles = StyleSheet.create({
     },
     modalRows: {
         flexDirection: 'row',
-        gap: 40
+        gap: 35
     },
     modalText: {
         color: '#FFFFFF',
-        fontSize: 24,
+        fontSize: 20,
+        fontWeight: '500',
         width: '20%'
     },
     input: {
         backgroundColor: '#F1F1F1',
         width: '70%',
         height: 45,
-        borderRadius: 10
+        borderRadius: 10,
+        fontSize: 18,
+        textAlign: 'center'
     },
     modalButton: {
         backgroundColor: '#228CDB',
