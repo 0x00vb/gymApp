@@ -91,10 +91,18 @@ const WorkoutLogger = (props) => {
                                                     :
                                                     exerciseLogs.map((item) => (
                                                         <TouchableOpacity style={styles.workoutRow} key={item.id}>
-                                                            <Text style={styles.workoutRowText}>{item.date}</Text>
-                                                            <Text style={styles.workoutRowText}>{item.sets}</Text>
-                                                            <Text style={styles.workoutRowText}>{item.weights}</Text>
-                                                            <Text style={styles.workoutRowText}>{item.reps}</Text>
+                                                            <View style={styles.workoutRowField}>
+                                                                <Text style={styles.workoutRowText}>{item.date}</Text>
+                                                            </View>
+                                                            <View style={styles.workoutRowField}>
+                                                                <Text style={styles.workoutRowText}>{item.sets}</Text>
+                                                            </View>
+                                                            <View style={styles.workoutRowField}>
+                                                                <Text style={styles.workoutRowText}>{item.weights}</Text>
+                                                            </View>
+                                                            <View style={styles.workoutRowField}>
+                                                                <Text style={styles.workoutRowText}>{item.reps}</Text>
+                                                            </View>
                                                         </TouchableOpacity>
                                                     ))
                                                 }
@@ -212,12 +220,17 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignSelf: 'center',
         alignItems: 'center',
-        justifyContent: 'center',
-        gap: 40,
+        justifyContent: 'space-between',
         backgroundColor: '#d9d9d9',
         borderWidth: 1,
         borderColor: '#000',
         borderRadius: 4,
+    },
+    workoutRowField: {
+        height: '100%',
+        width: 'auto',
+        borderColor: 'red',
+        borderWidth: 1
     },
     workoutRowText: {
         fontSize: 15,

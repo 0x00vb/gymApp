@@ -88,7 +88,13 @@ const styles = StyleSheet.create({
         aspectRatio: '1/1',
         alignItems: 'center',
         shadowColor: 'rgba(0, 0, 0, 0.75)',
-        elevation: 7,
+        elevation: 7, // android
+        shadowOffset: {
+            height: 1,
+            width: 1
+        },
+        shadowOpacity: 0.5,
+        shadowRadius: 3,
     },
     RMcalcWidget: {
         flexDirection: 'row',
