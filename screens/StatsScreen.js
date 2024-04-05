@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { useNavigation } from "@react-navigation/native";
 import Topbar from "../components/Topbar";
 import Icon from "react-native-vector-icons/Ionicons";
 import Icon2 from "react-native-vector-icons/MaterialCommunityIcons";
@@ -17,7 +16,7 @@ const StatsScreen = () => {
                 <View style={styles.upperSection}>
 
                     <View style={styles.widget}>
-                        <Text style={styles.widgetTitle}>Workouts</Text>
+                        <Text style={styles.widgetTitle}>Workouts logged</Text>
                         <View style={styles.widgetSpan}>
                             <Text style={{fontSize: 20}}>64</Text>
                         </View>
@@ -37,11 +36,12 @@ const StatsScreen = () => {
                 <ProgressChart/>
 
                 <TouchableOpacity style={styles.RMcalcWidget} onPress={() => setRMcalcVisible(true)}>
-                    <Icon2 name="weight-lifter" size={34} color={'#21212'}/>
+                    <Icon2 name="weight-lifter" size={34} color={'#000000'}/>
                     <Text style={{fontSize: 24, fontWeight: '500'}}>Calculate your 1 RM</Text>
                 </TouchableOpacity>
             </View>
-            <RMcalculator isVisible={RMcalcVisible} setIsVisible={setRMcalcVisible}/>   
+            <RMcalculator isVisible={RMcalcVisible} setIsVisible={setRMcalcVisible}/>
+
         </View>
     )
 }
@@ -79,11 +79,12 @@ const styles = StyleSheet.create({
         textShadowOffset: {width: -0.2, height: 0.2},
         textShadowRadius: 10,
         marginTop: 5,
-        marginBottom: 10
+        marginBottom: 10,
+        textAlign: 'center'
     },
     widgetSpan: {
         backgroundColor: '#F9F1F9',
-        padding: 5,
+        padding: 3,
         borderRadius: 100,
         aspectRatio: '1/1',
         alignItems: 'center',
