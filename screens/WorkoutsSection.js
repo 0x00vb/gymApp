@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useEffect, useRef, useState } from "react";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Animated, TouchableWithoutFeedback } from 'react-native';
 import Modal from 'react-native-modal'
 import { useNavigation } from "@react-navigation/native";
 import { useSQLiteContext } from "expo-sqlite/next";
@@ -12,6 +12,9 @@ const WorkoutSection = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [newWorkoutSplit, setNewWorkoutSplit] = useState("");
     const [longPressed, setLongPressed] = useState(null);
+    const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
+    const animationProgress = useRef(new Animated.Value(-71)).current;
+    
     const navigation = useNavigation();
 
     const db = useSQLiteContext();
@@ -44,68 +47,86 @@ const WorkoutSection = () => {
         }
     }
 
-    const removeWorkoutSplit = () => {
-        
+    const removeWorkoutSplit = async (workoutSplitId) => {
+        try {
+            await db.withTransactionAsync(async () => {
+                // Delete exercises associated with workout days associated with the workout split
+                await db.runAsync('DELETE FROM Exercises WHERE workout_day_id IN (SELECT id FROM WorkoutDays WHERE workout_splits_id = ?)', [workoutSplitId]);
+                // Delete workout days associated with the workout split
+                await db.runAsync('DELETE FROM WorkoutDays WHERE workout_splits_id = ?', [workoutSplitId]);
+                // Delete the workout split itself
+                await db.runAsync('DELETE FROM WorkoutSplits WHERE id = ?', [workoutSplitId]);
+            });
+            await getWorkoutSplits(); 
+        } catch (e) {
+            console.log('Error deleting workout split and related data:', e);
+        }
     }
 
-    const handleLongTouch = (itemId) => {
+    const showDeleteButton = (itemId) => {
         setLongPressed(itemId);
+        Animated.timing(animationProgress, {toValue: 0, useNativeDriver: false}).start();
+    }
+
+    const hideDeleteButton = () => {
+        setLongPressed(null);
+        Animated.timing(animationProgress, {toValue: -70, useNativeDriver: false}).start();
     }
 
     return(
-        <View>
-            <Topbar title={'Workouts'} setModalVisible={setModalVisible}/>
-            <ScrollView contentContainerStyle={styles.workoutsList}>
+        <TouchableWithoutFeedback onPress={hideDeleteButton}>
+            <View>
+                <Topbar title={'Workouts'} setModalVisible={setModalVisible}/>
+                <ScrollView contentContainerStyle={styles.workoutsList}>
 
-                {
-                    workoutSplits.map((item, index) => (
-                        <TouchableOpacity
-                            style={[styles.workoutSplitCard, longPressed === index && styles.longPressedSpan]}
-                            activeOpacity={0.7}
-                            onPress={() => hanldeCardPress(item.workout_split_name, item.id)} key={item.id}
-                            onLongPress={() => handleLongTouch(index)}
-                        >
-                            <Text style={styles.workoutSplitTitle}>{item.workout_split_name}</Text>
-                            <Text style={styles.workoutSplitFrec}>6 days/week</Text>
-                            {
-                                longPressed === index && (
-                                    <TouchableOpacity
-                                        style={styles.trashIconContainer}
-                                        onPress={null}
-                                    >
-                                        <Icon name='trash' size={28} color={'#aa1212'}/>
-                                    </TouchableOpacity>
-                                )
-                            }
-                        </TouchableOpacity>
+                    {
+                        workoutSplits.map((item, index) => (
+                            <TouchableOpacity
+                                style={styles.workoutSplitCard}
+                                activeOpacity={0.7}
+                                onPress={() => hanldeCardPress(item.workout_split_name, item.id)} key={item.id}
+                                onLongPress={() => showDeleteButton(index)}
+                            >
+                                <Text style={styles.workoutSplitTitle}>{item.workout_split_name}</Text>
+                                <Text style={styles.workoutSplitFrec}>6 days/week</Text>
 
-                    ))
-                }
+                                <AnimatedTouchable
+                                    style={[styles.trashIconContainer, {right: longPressed == index ? animationProgress : -100}]}
+                                    onPress={() => console.log(removeWorkoutSplit(item.id))}
+                                    activeOpacity={0.9}
+                                >
+                                    <Icon name='trash' size={28} color={'#D9D9D9'}/>
+                                </AnimatedTouchable>
+                            </TouchableOpacity>
 
-            </ScrollView>
-            <Modal isVisible={modalVisible} style={styles.modalView} onBackdropPress={() => setModalVisible(false)}>
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : null}
-                >
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Add workout</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Workout name"
-                            value={newWorkoutSplit}
-                            onChangeText={(text) => setNewWorkoutSplit(text)}
-                        />
-                        <TextInput
-                            style={styles.input}
-                            placeholder=""
-                        />
-                        <TouchableOpacity onPress={() => addWorkoutSplit()} style={styles.saveButton} activeOpacity={0.6}>
-                            <Text style={{fontSize: 18, fontWeight: '700', color: '#f1f1f1'}}>Save workout</Text>
-                        </TouchableOpacity>
-                    </View>
-                </KeyboardAvoidingView>
-            </Modal>
-        </View>
+                        ))
+                    }
+
+                </ScrollView>
+                <Modal isVisible={modalVisible} style={styles.modalView} onBackdropPress={() => setModalVisible(false)}>
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : null}
+                    >
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>Add workout</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Workout name"
+                                value={newWorkoutSplit}
+                                onChangeText={(text) => setNewWorkoutSplit(text)}
+                            />
+                            <TextInput
+                                style={styles.input}
+                                placeholder=""
+                            />
+                            <TouchableOpacity onPress={() => addWorkoutSplit()} style={styles.saveButton} activeOpacity={0.6}>
+                                <Text style={{fontSize: 18, fontWeight: '700', color: '#f1f1f1'}}>Save workout</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </KeyboardAvoidingView>
+                </Modal>
+            </View>
+        </TouchableWithoutFeedback>
     )
 }
 
@@ -128,6 +149,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 4 },
         shadowRadius: 4,
         shadowOpacity: 0.30,
+        overflow: 'hidden'
     },
     workoutSplitTitle: {
         fontSize: 22,
@@ -166,14 +188,15 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         borderRadius: 10
     },
-    longPressedSpan: {
-        borderColor: '#aa1212',
-        borderWidth: 2,
-    },
     trashIconContainer: {
+        height: 80,
+        width: 70,
+        backgroundColor: '#aa1212',
+        alignItems: 'center',
+        justifyContent: 'center',
         position: 'absolute',
-        top: '30%',
-        right: 10
+        borderBottomRightRadius: 10,
+        borderTopRightRadius: 10
     }
 })
 

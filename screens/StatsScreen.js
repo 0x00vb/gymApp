@@ -21,7 +21,7 @@ const StatsScreen = () => {
                         <View style={styles.widgetSpan}>
                             <Text style={{fontSize: 20}}>64</Text>
                         </View>
-                        <Icon name="barbell" size={60} color={'#212121'}/>
+                        <Icon name="barbell" size={60}/>
                     </View>
 
                     <View style={styles.widget}>

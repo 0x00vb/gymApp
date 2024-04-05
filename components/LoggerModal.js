@@ -1,23 +1,42 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import Modal from 'react-native-modal';
 import { useSQLiteContext } from "expo-sqlite/next";
+import Icon from "react-native-vector-icons/Ionicons";
 
 const getCurrentDate = () => {
     const currentDate = new Date();
     const year = currentDate.getFullYear();
-    const month = ('0' + (currentDate.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-based
+    const month = ('0' + (currentDate.getMonth() + 1)).slice(-2);
     const day = ('0' + currentDate.getDate()).slice(-2);
     return `${year}/${month}/${day}`;
 };
 
-const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, getExerciseLogs }) => {
+const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, getExerciseLogs, selectedExerciseLogId }) => {
     const [date, setDate] = useState(getCurrentDate());
     const [sets, setSets] = useState();
     const [weights, setWeights] = useState('');
     const [reps, setReps] = useState('');
 
     const db = useSQLiteContext();
+
+    useEffect(() => {
+        const fetchExistingLog = async () => {
+            if(selectedExerciseLogId){
+                const result = await db.getAllAsync(
+                    'SELECT * FROM Logs WHERE id = ?',
+                    [selectedExerciseLogId]
+                );
+                setDate(result[0].date);
+                setSets(result[0].sets);
+                setWeights(result[0].weights);
+                setReps(result[0].reps)               
+            }
+        }
+        if (modalVisible) {
+            fetchExistingLog();
+        }
+    }, [modalVisible, selectedExerciseLogId])
 
     const resetFields = () => {
         setDate(getCurrentDate());
@@ -26,19 +45,48 @@ const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, 
         setReps('');
     }
 
-    const handleSaveLog = async () => {
+    const handleSaveNewLog = async () => {
         try{
             db.withTransactionAsync(async () => {
                 await db.runAsync(
                     'INSERT INTO Logs (exercise_id, date, weights, sets, reps) VALUES (?, ?, ?, ?, ?)',
                     [exerciseId, date, weights, sets, reps]
                 );
-            })
-            getExerciseLogs(exerciseId);
+            });
+            await getExerciseLogs(exerciseId);
             resetFields();
             setModalVisible(false);
         }catch(error){
-            console.log(error);
+            console.log('Error saving Log', error);
+        }
+    }
+
+    const handleDeleteLog = async () => {
+        try{
+            await db.withTransactionAsync(async () => {
+                await db.runAsync('DELETE FROM Logs WHERE id = ?', [selectedExerciseLogId]);
+            });
+            await getExerciseLogs(exerciseId);
+            resetFields();
+            setModalVisible(false);
+        }catch(e){
+            console.log('Error deleting Log: ', e);
+        }
+    }
+
+    const handleSaveEdit = async () => {
+        try{
+            await db.withTransactionAsync(async () => {
+                await db.runAsync(
+                    'UPDATE Logs SET date = ?, weights = ?, sets = ?, reps = ? WHERE id = ?',
+                    [date, weights, sets, reps, selectedExerciseLogId]
+                );
+            });
+            await getExerciseLogs(exerciseId);
+            resetFields();
+            setModalVisible(false);
+        }catch(e){
+            console.log('Error saving the edited Log: ', e);
         }
     }
 
@@ -56,7 +104,17 @@ const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, 
             >
 
                 <View style={styles.modalContainer}>
-                    <Text style={styles.modalTitle}>{exerciseName} Log</Text>
+                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                        <Text style={styles.modalTitle}>{exerciseName} Log</Text>
+                        {
+                            selectedExerciseLogId && (
+                                <TouchableOpacity onPress={handleDeleteLog}>
+                                    <Icon name="trash" size={24} color='#aa1212'/>
+                                </TouchableOpacity>
+                            )
+                        }
+                    </View>
+                    
                     <View style={styles.modalTable}>
                         <View style={styles.rows}>
                             <Text style={styles.rowText}>Date</Text>
@@ -73,8 +131,9 @@ const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, 
                             <TextInput
                                 style={styles.input}
                                 placeholder={'---'}
-                                value={sets}
+                                value={sets ? String(sets) : ''}
                                 onChangeText={(text) => setSets(text)}
+                                keyboardType = 'numeric'
                             />
                         </View>
 
@@ -99,7 +158,7 @@ const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, 
                         </View>
 
                     </View>
-                    <TouchableOpacity style={styles.submit} activeOpacity={0.6} onPress={handleSaveLog}>
+                    <TouchableOpacity style={styles.submit} activeOpacity={0.6} onPress={selectedExerciseLogId ?  handleSaveEdit : handleSaveNewLog}>
                         <Text style={{fontSize: 20, fontWeight: '700', color: '#F1F1F1'}}>Save log</Text>
                     </TouchableOpacity>
                 </View>
@@ -111,7 +170,7 @@ const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, 
 const styles = StyleSheet.create({
     modalView: {
         margin: 10,
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
     modalContainer: {
         backgroundColor: 'rgba(255,255,255,0.8)',

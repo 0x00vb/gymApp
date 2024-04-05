@@ -16,6 +16,7 @@ const WorkoutLogger = (props) => {
     const [exerciseText, setExerciseText] = useState("");
     const [selectedExerciseId, setSelectedExerciseId] = useState();
     const [selectedExerciseName, setSelectedExerciseName] = useState();
+    const [selectedExerciseLogId, setSelectedExerciseLogId] = useState(null);
     
     const db = useSQLiteContext();
 
@@ -31,7 +32,7 @@ const WorkoutLogger = (props) => {
     }
 
     const getExerciseLogs = async (exercise_id) => {
-        const response = await db.getAllAsync('SELECT * FROM Logs WHERE exercise_id = ?', [exercise_id]);
+        const response = await db.getAllAsync('SELECT * FROM Logs WHERE exercise_id = ? ORDER BY date ASC', [exercise_id]);
         setExerciseLogs([]);
         setExerciseLogs(response);
     }
@@ -64,6 +65,12 @@ const WorkoutLogger = (props) => {
         }
     }
 
+    const hanldeEditLog = (logId) => {
+        setSelectedExerciseLogId(logId);
+        setEditLogModalVisible(true);
+    }
+
+    const [editLogModalVisible, setEditLogModalVisible] = useState(false);
     return(
         <View>
             <Topbar title={title} subtitle={subtitle}/>
@@ -77,7 +84,6 @@ const WorkoutLogger = (props) => {
                                     <View>
                                         <View style={styles.workoutCardExpandedGridContainer}>
                                             <View style={styles.gridHeader}>
-                                                <Text style={styles.gridHeaderText}>Date</Text>
                                                 <Text style={styles.gridHeaderText}>Sets</Text>
                                                 <Text style={styles.gridHeaderText}>Weight</Text>
                                                 <Text style={styles.gridHeaderText}>Reps</Text>
@@ -90,14 +96,13 @@ const WorkoutLogger = (props) => {
                                                         </Text> 
                                                     :
                                                     exerciseLogs.map((item) => (
-                                                        <TouchableOpacity style={styles.workoutRow} key={item.id}>
-                                                            <View style={styles.workoutRowField}>
-                                                                <Text style={styles.workoutRowText}>{item.date}</Text>
-                                                            </View>
+                                                        <TouchableOpacity style={styles.workoutRow} key={item.id}
+                                                            onPress={() => hanldeEditLog(item.id)}
+                                                        >
                                                             <View style={styles.workoutRowField}>
                                                                 <Text style={styles.workoutRowText}>{item.sets}</Text>
                                                             </View>
-                                                            <View style={styles.workoutRowField}>
+                                                            <View style={[styles.workoutRowField, , {borderColor: '#000000', borderLeftWidth: 1, borderRightWidth: 1}]}>
                                                                 <Text style={styles.workoutRowText}>{item.weights}</Text>
                                                             </View>
                                                             <View style={styles.workoutRowField}>
@@ -133,6 +138,15 @@ const WorkoutLogger = (props) => {
                 exerciseName={selectedExerciseName}
                 getExerciseLogs={getExerciseLogs}
                 setExerciseLogs={setExerciseLogs}
+            />
+            <LoggerModal
+                modalVisible={editLogModalVisible}
+                setModalVisible={setEditLogModalVisible}
+                exerciseId={selectedExerciseId}
+                exerciseName={selectedExerciseName}
+                getExerciseLogs={getExerciseLogs}
+                setExerciseLogs={setExerciseLogs}
+                selectedExerciseLogId={selectedExerciseLogId}
             />
             <ModalInput
                 title={"Add Exercise"}
@@ -200,9 +214,9 @@ const styles = StyleSheet.create({
     },
     gridHeader: {
         flexDirection: 'row',   
-        justifyContent: 'center',
-        gap: 50,
-        marginVertical: 7,     
+        justifyContent: 'space-around',
+        marginVertical: 7,
+        marginHorizontal: 15
     },
     gridHeaderText: {
         fontSize: 15,
@@ -228,12 +242,13 @@ const styles = StyleSheet.create({
     },
     workoutRowField: {
         height: '100%',
-        width: 'auto',
-        borderColor: 'red',
-        borderWidth: 1
+        width: '33%',
+        justifyContent: 'center',
+
     },
     workoutRowText: {
         fontSize: 15,
+        textAlign: 'center'
     },
     addExercise: {
         width: '88%',
