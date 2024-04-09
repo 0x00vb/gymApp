@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import Modal from 'react-native-modal';
 import Topbar from "../components/Topbar";
 import Icon from "react-native-vector-icons/FontAwesome";
 import ModalInput from "../components/ModalInput";

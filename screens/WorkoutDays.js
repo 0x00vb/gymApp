@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
-import Modal from 'react-native-modal';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 
 import Topbar from "../components/Topbar";
 import ModalInput from '../components/ModalInput'
-import Icon from "react-native-vector-icons/FontAwesome";
 import { useSQLiteContext } from "expo-sqlite/next";
 
 const WorkoutLogger = (props) => {
@@ -47,7 +45,7 @@ const WorkoutLogger = (props) => {
 
     return(
         <View>
-            <Topbar title={title}/>
+            <Topbar title={title} style={{flex: 1}}/>
             <ScrollView contentContainerStyle={styles.workoutsList}>
                 {
                     workoutDays.map((item) => (
@@ -88,7 +86,8 @@ const styles = StyleSheet.create({
         height: '100%',
         alignItems: 'center',
         marginTop: 30,
-        gap: 24
+        gap: 24,
+        flexGrow: 1
     },
     workoutCard: {
         width: 340,

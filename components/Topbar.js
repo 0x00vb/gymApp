@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 
@@ -9,7 +9,7 @@ const Topbar = (props) => {
     return(
         <View style={styles.topbarContainer}>
             <View style={styles.topbarHeader}>
-                <Text style={styles.topbarText}>{title}</Text>
+                <Text style={[styles.topbarText, Platform.OS == "android" && {marginTop: 15}]}>{title}</Text>
                 { 
                     title === 'Workouts' && 
                         <TouchableOpacity style={{position: 'absolute', right: '5%', bottom: 0}} onPress={() => props.setModalVisible(true)}>
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#2d2d2d',
         alignItems: 'center',
         top: 0,
-        minHeight: 100,
+        minHeight: 10,
         height: 'auto',
         width: '100%',
         flexDirection: 'column',
@@ -46,8 +46,8 @@ const styles = StyleSheet.create({
         width: '100%',
         flexDirection: 'row',
         marginTop: 20,
-        justifyContent: 'center'
-        
+        justifyContent: 'center',
+        marginBottom: 5
     },
     topbarText: {
         color: '#f1f1f1',
