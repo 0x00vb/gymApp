@@ -38,6 +38,12 @@ const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, 
         }
     }, [modalVisible, selectedExerciseLogId])
 
+    const fieldsValidation = (text, setter) => {
+        if(/^[0-9\/]*$/.test(text)){
+            setter(text);
+        }
+    }
+
     const resetFields = () => {
         setDate(getCurrentDate());
         setWeights('');
@@ -120,7 +126,7 @@ const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, 
                                 style={styles.input}
                                 placeholder={'DD/MM'}
                                 value={date}
-                                onChangeText={(text) => setDate(text)}
+                                onChangeText={(text) => fieldsValidation(text, setDate)}
                             />
                         </View>
 
@@ -130,7 +136,7 @@ const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, 
                                 style={styles.input}
                                 placeholder={'---'}
                                 value={sets ? String(sets) : ''}
-                                onChangeText={(text) => setSets(text)}
+                                onChangeText={(text) => fieldsValidation(text, setSets)}
                                 keyboardType = 'numeric'
                             />
                         </View>
@@ -141,7 +147,7 @@ const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, 
                                 style={styles.input}
                                 placeholder={"---/---/---"}
                                 value={weights}
-                                onChangeText={(text) => setWeights(text)}
+                                onChangeText={(text) => fieldsValidation(text, setWeights)}
                             />
                         </View>
 
@@ -151,7 +157,7 @@ const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, 
                                 style={styles.input}
                                 placeholder={"---/---/---"}
                                 value={reps}
-                                onChangeText={(text) => setReps(text)}
+                                onChangeText={(text) => fieldsValidation(text, setReps)}
                             />
                         </View>
 

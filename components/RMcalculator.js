@@ -10,15 +10,14 @@ const RMcalculator = ({ isVisible, setIsVisible }) => {
 
     const calculateRM = () => {
         if(weight == null || reps == null){return;}
+        setWeight();
+        setReps();
         const result1 = weight / (1.0278 - 0.0278 * reps);
         const result2 = result1 * 95 / 100;
         const result3 = result1 * 90 / 100;
-        console.log(result1 + "," + result2);
         setRMresults([result1, result2, result3].map(i => (i.toFixed(2))));
         Keyboard.dismiss();
         setResultModalVisible(true);
-        console.log(RMresults)
-
     }
 
     return (
