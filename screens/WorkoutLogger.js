@@ -89,12 +89,12 @@ const WorkoutLogger = (props) => {
                                             </View>
                                             <ScrollView contentContainerStyle={styles.gridList}>
                                                 {
-                                                    exerciseLogs.length === 0 ? 
+                                                    exerciseLogs?.length === 0 ? 
                                                         <Text style={{alignSelf: 'center', fontSize: 17, color: '#808080'}}>
                                                             No logs found...
                                                         </Text> 
                                                     :
-                                                    exerciseLogs.map((item) => (
+                                                    exerciseLogs?.map((item) => (
                                                         <TouchableOpacity style={styles.workoutRow} key={item.id}
                                                             onPress={() => hanldeEditLog(item.id)}
                                                         >

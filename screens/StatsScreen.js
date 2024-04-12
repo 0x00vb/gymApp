@@ -1,14 +1,33 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import Topbar from "../components/Topbar";
 import Icon from "react-native-vector-icons/Ionicons";
 import Icon2 from "react-native-vector-icons/MaterialCommunityIcons";
 import RMcalculator from "../components/RMcalculator";
 import ProgressChart from "../components/ProgessChart";
+import { useSQLiteContext } from "expo-sqlite/next";
 
 const StatsScreen = () => {
     const [RMcalcVisible, setRMcalcVisible] = useState(false);
+    const [workoutsAmount, setWorkoutsAmount] = useState(0);
 
+    const db = useSQLiteContext();
+
+
+    useEffect(() => {
+        const getWidgetData = async () => {
+            try{
+                const workoutsAmountResponse = await db.getAllAsync('SELECT COUNT(DISTINCT date) AS workout_count FROM Logs');
+                
+                setWorkoutsAmount(workoutsAmountResponse[0].workout_count);
+            }catch(e){
+                console.log(e);
+            }
+        }
+        getWidgetData();
+    }, [])
+
+    
     return(
         <View>
             <Topbar title={"Statistics"}/>
@@ -16,9 +35,9 @@ const StatsScreen = () => {
                 <View style={styles.upperSection}>
 
                     <View style={styles.widget}>
-                        <Text style={styles.widgetTitle}>Workouts logged</Text>
+                        <Text style={styles.widgetTitle}>Workouts</Text>
                         <View style={styles.widgetSpan}>
-                            <Text style={{fontSize: 20}}>64</Text>
+                            <Text style={{fontSize: 20}}>{workoutsAmount}</Text>
                         </View>
                         <Icon name="barbell" size={60}/>
                     </View>
@@ -72,7 +91,7 @@ const styles = StyleSheet.create({
         },
     },
     widgetTitle: {
-        fontSize: 26,
+        fontSize: 24,
         fontWeight: 'bold',
         color: '#217EC2',
         textShadowColor: 'rgba(0, 0, 0, 0.25)',

@@ -12,7 +12,7 @@ const getCurrentDate = () => {
     return `${year}/${month}/${day}`;
 };
 
-const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, getExerciseLogs, selectedExerciseLogId }) => {
+const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, getExerciseLogs, setExerciseLogs, selectedExerciseLogId }) => {
     const [date, setDate] = useState(getCurrentDate());
     const [sets, setSets] = useState();
     const [weights, setWeights] = useState('');
@@ -47,12 +47,10 @@ const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, 
 
     const handleSaveNewLog = async () => {
         try{
-            db.withTransactionAsync(async () => {
-                await db.runAsync(
-                    'INSERT INTO Logs (exercise_id, date, weights, sets, reps) VALUES (?, ?, ?, ?, ?)',
-                    [exerciseId, date, weights, sets, reps]
-                );
-            });
+            await db.runAsync(
+                'INSERT INTO Logs (exercise_id, date, weights, sets, reps) VALUES (?, ?, ?, ?, ?)',
+                [exerciseId, date, weights, sets, reps]
+            );
             await getExerciseLogs(exerciseId);
             resetFields();
             setModalVisible(false);
