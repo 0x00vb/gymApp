@@ -175,12 +175,12 @@ const styles = StyleSheet.create({
     modalView: {
         margin: 10,
         justifyContent: 'center',
+
     },
     modalContainer: {
         backgroundColor: 'rgba(255,255,255,0.8)',
         padding: 20,
-        borderRadius: 10
-
+        borderRadius: 10,
     },
     modalTitle: {
         fontSize: 22,
