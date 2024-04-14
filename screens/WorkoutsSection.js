@@ -4,6 +4,7 @@ import Modal from 'react-native-modal'
 import { useNavigation } from "@react-navigation/native";
 import { useSQLiteContext } from "expo-sqlite/next";
 import Icon from "react-native-vector-icons/Ionicons";
+import useDeleteButtonAnimation from "../hooks/useDeleteButtonAnimation";
 
 import Topbar from "../components/Topbar";
 
@@ -11,13 +12,11 @@ const WorkoutSection = () => {
     const [workoutSplits, setWorkoutSplits] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [newWorkoutSplit, setNewWorkoutSplit] = useState("");
-    const [longPressed, setLongPressed] = useState(null);
-    const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
-    const animationProgress = useRef(new Animated.Value(-71)).current;
     
     const navigation = useNavigation();
-
     const db = useSQLiteContext();
+
+    const { longPressed, setLongPressed, animationProgress, showDeleteButton, hideDeleteButton } = useDeleteButtonAnimation();
 
     useEffect(() => {
         db.withTransactionAsync(async () => {
@@ -41,7 +40,9 @@ const WorkoutSection = () => {
             db.withTransactionAsync(async () => {
                 await db.runAsync('INSERT INTO WorkoutSplits (workout_split_name) VALUES (?)', [newWorkoutSplit])
             })
+            await getWorkoutSplits();
             setModalVisible(false);
+            setLongPressed();
         }catch(e){
             console.log(e);
         }
@@ -50,6 +51,8 @@ const WorkoutSection = () => {
     const removeWorkoutSplit = async (workoutSplitId) => {
         try {
             await db.withTransactionAsync(async () => {
+                // Delete logs associated with exercises within workout days associated with the workout split
+                await db.runAsync('DELETE FROM Logs WHERE exercise_id IN (SELECT id FROM Exercises WHERE workout_day_id IN (SELECT id FROM WorkoutDays WHERE workout_splits_id = ?))', [workoutSplitId]);
                 // Delete exercises associated with workout days associated with the workout split
                 await db.runAsync('DELETE FROM Exercises WHERE workout_day_id IN (SELECT id FROM WorkoutDays WHERE workout_splits_id = ?)', [workoutSplitId]);
                 // Delete workout days associated with the workout split
@@ -57,20 +60,10 @@ const WorkoutSection = () => {
                 // Delete the workout split itself
                 await db.runAsync('DELETE FROM WorkoutSplits WHERE id = ?', [workoutSplitId]);
             });
-            await getWorkoutSplits(); 
+            await getWorkoutSplits();
         } catch (e) {
             console.log('Error deleting workout split and related data:', e);
         }
-    }
-
-    const showDeleteButton = (itemId) => {
-        setLongPressed(itemId);
-        Animated.timing(animationProgress, {toValue: 0, useNativeDriver: false}).start();
-    }
-
-    const hideDeleteButton = () => {
-        setLongPressed(null);
-        Animated.timing(animationProgress, {toValue: -70, useNativeDriver: false}).start();
     }
 
     return(
@@ -89,14 +82,14 @@ const WorkoutSection = () => {
                             >
                                 <Text style={styles.workoutSplitTitle}>{item.workout_split_name}</Text>
                                 <Text style={styles.workoutSplitFrec}>6 days/week</Text>
-
-                                <AnimatedTouchable
-                                    style={[styles.trashIconContainer, {right: longPressed == index ? animationProgress : -100}]}
-                                    onPress={() => console.log(removeWorkoutSplit(item.id))}
-                                    activeOpacity={0.9}
-                                >
-                                    <Icon name='trash' size={28} color={'#D9D9D9'}/>
-                                </AnimatedTouchable>
+                                <Animated.View style={[styles.trashIconContainer, {right: longPressed == index ? animationProgress : -100}]}>
+                                    <TouchableOpacity
+                                        onPress={() => console.log(removeWorkoutSplit(item.id))}
+                                        activeOpacity={0.9}
+                                    >
+                                        <Icon name='trash' size={28} color={'#D9D9D9'}/>
+                                    </TouchableOpacity>
+                                </Animated.View>
                             </TouchableOpacity>
 
                         ))

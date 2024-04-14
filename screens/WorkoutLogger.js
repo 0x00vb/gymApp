@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Animated } from 'react-native';
+import useDeleteButtonAnimation from "../hooks/useDeleteButtonAnimation";
 import Topbar from "../components/Topbar";
 import Icon from "react-native-vector-icons/FontAwesome";
 import ModalInput from "../components/ModalInput";
@@ -18,6 +19,8 @@ const WorkoutLogger = (props) => {
     const [selectedExerciseLogId, setSelectedExerciseLogId] = useState(null);
     
     const db = useSQLiteContext();
+
+    const { longPressed, setLongPressed, animationProgress, showDeleteButton, hideDeleteButton } = useDeleteButtonAnimation();
 
     useEffect(() => {
         db.withTransactionAsync(async () => {
@@ -52,6 +55,13 @@ const WorkoutLogger = (props) => {
         setExpandedCard((cardIndex) === expandedCard ? null : (cardIndex));
     }
 
+    
+    const [editLogModalVisible, setEditLogModalVisible] = useState(false);
+    const hanldeEditLog = (logId) => {
+        setSelectedExerciseLogId(logId);
+        setEditLogModalVisible(true);
+    }
+    
     const handleAddExercise = async () => {
         try{    
             db.withTransactionAsync(async () => {
@@ -64,101 +74,124 @@ const WorkoutLogger = (props) => {
         }
     }
 
-    const hanldeEditLog = (logId) => {
-        setSelectedExerciseLogId(logId);
-        setEditLogModalVisible(true);
+    const handleRemoveExercise = async (exerciseId) => {
+        try{
+            await db.withTransactionAsync(async () => {
+                await db.runAsync('DELETE FROM Logs WHERE exercise_id = ?', [exerciseId]);
+                await db.runAsync('DELETE FROM Exercises WHERE id = ?', [exerciseId]);
+            });
+            await getExercises();
+            setLongPressed(null);
+        }catch(e){
+            console.log("Error removing exercise: ", e);
+        }
     }
 
-    const [editLogModalVisible, setEditLogModalVisible] = useState(false);
     return(
-        <View>
-            <Topbar title={title} subtitle={subtitle}/>
-            <ScrollView contentContainerStyle={styles.workoutsList}>
-                {
-                    exercises.map((item, index) => (
-                        <TouchableOpacity style={styles.workoutCard} activeOpacity={0.6} onPress={() => hanldeCardPress(index, item.id)} key={item.id}>
-                            <Text style={styles.workoutTitle}>{item.exercise_name}</Text>
-                            {
-                                expandedCard === index && (
-                                    <View>
-                                        <View style={styles.workoutCardExpandedGridContainer}>
-                                            <View style={styles.gridHeader}>
-                                                <Text style={styles.gridHeaderText}>Sets</Text>
-                                                <Text style={styles.gridHeaderText}>Weight</Text>
-                                                <Text style={styles.gridHeaderText}>Reps</Text>
+        <TouchableWithoutFeedback onPress={hideDeleteButton}>
+            <View>
+                <Topbar title={title} subtitle={subtitle}/>
+                <ScrollView contentContainerStyle={styles.workoutsList}>
+                    {
+                        exercises.map((item, index) => (
+                            <TouchableOpacity
+                                style={styles.workoutCard}
+                                activeOpacity={0.6}
+                                onPress={() => hanldeCardPress(index, item.id)}
+                                onLongPress={() => showDeleteButton(index)}
+                                key={item.id}
+                            >
+                                <Text style={styles.workoutTitle}>{item.exercise_name}</Text>
+                                <Animated.View style={[styles.trashIconContainer, {right: longPressed == index ? animationProgress : -100}]}>
+                                    <TouchableOpacity
+                                        onPress={() => handleRemoveExercise(item.id)}
+                                        activeOpacity={0.9}
+                                    >
+                                        <Icon name='trash' size={28} color={'#D9D9D9'}/>
+                                    </TouchableOpacity>
+                                </Animated.View>
+
+                                {
+                                    expandedCard === index && (
+                                        <View>
+                                            <View style={styles.workoutCardExpandedGridContainer}>
+                                                <View style={styles.gridHeader}>
+                                                    <Text style={styles.gridHeaderText}>Sets</Text>
+                                                    <Text style={styles.gridHeaderText}>Weight</Text>
+                                                    <Text style={styles.gridHeaderText}>Reps</Text>
+                                                </View>
+                                                <ScrollView contentContainerStyle={styles.gridList}>
+                                                    {
+                                                        exerciseLogs?.length === 0 ? 
+                                                            <Text style={{alignSelf: 'center', fontSize: 17, color: '#808080'}}>
+                                                                No logs found...
+                                                            </Text> 
+                                                        :
+                                                        exerciseLogs?.map((item) => (
+                                                            <TouchableOpacity style={styles.workoutRow} key={item.id}
+                                                                onPress={() => hanldeEditLog(item.id)}
+                                                            >
+                                                                <View style={styles.workoutRowField}>
+                                                                    <Text style={styles.workoutRowText}>{item.sets}</Text>
+                                                                </View>
+                                                                <View style={[styles.workoutRowField, , {borderColor: '#000000', borderLeftWidth: 1, borderRightWidth: 1}]}>
+                                                                    <Text style={styles.workoutRowText}>{item.weights}</Text>
+                                                                </View>
+                                                                <View style={styles.workoutRowField}>
+                                                                    <Text style={styles.workoutRowText}>{item.reps}</Text>
+                                                                </View>
+                                                            </TouchableOpacity>
+                                                        ))
+                                                    }
+                                                </ScrollView>
                                             </View>
-                                            <ScrollView contentContainerStyle={styles.gridList}>
-                                                {
-                                                    exerciseLogs?.length === 0 ? 
-                                                        <Text style={{alignSelf: 'center', fontSize: 17, color: '#808080'}}>
-                                                            No logs found...
-                                                        </Text> 
-                                                    :
-                                                    exerciseLogs?.map((item) => (
-                                                        <TouchableOpacity style={styles.workoutRow} key={item.id}
-                                                            onPress={() => hanldeEditLog(item.id)}
-                                                        >
-                                                            <View style={styles.workoutRowField}>
-                                                                <Text style={styles.workoutRowText}>{item.sets}</Text>
-                                                            </View>
-                                                            <View style={[styles.workoutRowField, , {borderColor: '#000000', borderLeftWidth: 1, borderRightWidth: 1}]}>
-                                                                <Text style={styles.workoutRowText}>{item.weights}</Text>
-                                                            </View>
-                                                            <View style={styles.workoutRowField}>
-                                                                <Text style={styles.workoutRowText}>{item.reps}</Text>
-                                                            </View>
-                                                        </TouchableOpacity>
-                                                    ))
-                                                }
-                                            </ScrollView>
+                                            <TouchableOpacity
+                                                style={styles.addWorkout}
+                                                onPress={() => {toggleLogModal(item.id), setSelectedExerciseName(item.exercise_name)}}>
+                                                <Icon name="plus" size={30} color={'#f1f1f1'}/>
+                                            </TouchableOpacity>
                                         </View>
-                                        <TouchableOpacity
-                                            style={styles.addWorkout}
-                                            onPress={() => {toggleLogModal(item.id), setSelectedExerciseName(item.exercise_name)}}>
-                                            <Icon name="plus" size={30} color={'#f1f1f1'}/>
-                                        </TouchableOpacity>
-                                    </View>
-                                )
-                            }
-                        </TouchableOpacity>
-                    ))
-                }   
+                                    )
+                                }
+                            </TouchableOpacity>
+                        ))
+                    }   
 
 
-                {/* -------  */}
-                <TouchableOpacity style={styles.addExercise} activeOpacity={0.6} onPress={toggleAddExerciseModal}>
-                    <Text style={{color: '#f1f1f1', fontSize: 22, fontWeight: '700'}}>Add exercise</Text>
-                </TouchableOpacity>
-            </ScrollView>
-            <LoggerModal
-                modalVisible={LogModalVisible}
-                setModalVisible={setLogModalVisible}
-                exerciseId={selectedExerciseId}
-                exerciseName={selectedExerciseName}
-                getExerciseLogs={getExerciseLogs}
-                setExerciseLogs={setExerciseLogs}
-            />
-            <LoggerModal
-                modalVisible={editLogModalVisible}
-                setModalVisible={setEditLogModalVisible}
-                exerciseId={selectedExerciseId}
-                exerciseName={selectedExerciseName}
-                getExerciseLogs={getExerciseLogs}
-                setExerciseLogs={setExerciseLogs}
-                selectedExerciseLogId={selectedExerciseLogId}
-            />
-            <ModalInput
-                title={"Add Exercise"}
-                buttonText={'Save exercise'}
-                setText={setExerciseText}
-                placeholder={"Exercise name"}
-                inputValue={exerciseText}
-                modalVisible={addExerciseModalVisible}
-                setModalVisible={setAddExerciseModalVisible}    
-                onSubmit={handleAddExercise}
-            /> 
-        </View>
-
+                    {/* -------  */}
+                    <TouchableOpacity style={styles.addExercise} activeOpacity={0.6} onPress={toggleAddExerciseModal}>
+                        <Text style={{color: '#f1f1f1', fontSize: 22, fontWeight: '700'}}>Add exercise</Text>
+                    </TouchableOpacity>
+                </ScrollView>
+                <LoggerModal
+                    modalVisible={LogModalVisible}
+                    setModalVisible={setLogModalVisible}
+                    exerciseId={selectedExerciseId}
+                    exerciseName={selectedExerciseName}
+                    getExerciseLogs={getExerciseLogs}
+                    setExerciseLogs={setExerciseLogs}
+                />
+                <LoggerModal
+                    modalVisible={editLogModalVisible}
+                    setModalVisible={setEditLogModalVisible}
+                    exerciseId={selectedExerciseId}
+                    exerciseName={selectedExerciseName}
+                    getExerciseLogs={getExerciseLogs}
+                    setExerciseLogs={setExerciseLogs}
+                    selectedExerciseLogId={selectedExerciseLogId}
+                />
+                <ModalInput
+                    title={"Add Exercise"}
+                    buttonText={'Save exercise'}
+                    setText={setExerciseText}
+                    placeholder={"Exercise name"}
+                    inputValue={exerciseText}
+                    modalVisible={addExerciseModalVisible}
+                    setModalVisible={setAddExerciseModalVisible}    
+                    onSubmit={handleAddExercise}
+                /> 
+            </View>
+        </TouchableWithoutFeedback>
     )
 }
 
@@ -181,6 +214,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 4 },
         shadowRadius: 4,
         shadowOpacity: 0.30,
+        overflow: 'hidden'
     },
     workoutTitle: {
         fontSize: 22,
@@ -258,6 +292,16 @@ const styles = StyleSheet.create({
         backgroundColor: '#228CDB',
         marginVertical: 10,
         borderRadius: 10
+    },
+    trashIconContainer: {
+        height: '100%',
+        width: 50,
+        backgroundColor: '#aa1212',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'absolute',
+        borderBottomRightRadius: 10,
+        borderTopRightRadius: 10
     }
 })
 
