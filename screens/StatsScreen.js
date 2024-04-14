@@ -6,13 +6,13 @@ import Icon2 from "react-native-vector-icons/MaterialCommunityIcons";
 import RMcalculator from "../components/RMcalculator";
 import ProgressChart from "../components/ProgessChart";
 import { useSQLiteContext } from "expo-sqlite/next";
+import PieChartGraph from "../components/PieChartGraph";
 
 const StatsScreen = () => {
     const [RMcalcVisible, setRMcalcVisible] = useState(false);
     const [workoutsAmount, setWorkoutsAmount] = useState(0);
 
     const db = useSQLiteContext();
-
 
     useEffect(() => {
         const getWidgetData = async () => {
@@ -26,40 +26,43 @@ const StatsScreen = () => {
         }
         getWidgetData();
     }, [])
-
     
     return(
         <View>
             <Topbar title={"Statistics"}/>
-            <View style={styles.widgetsContainer}>
-                <View style={styles.upperSection}>
+            <ScrollView contentContainerStyle={{paddingBottom: 175}}>
+                <View style={styles.widgetsContainer}>
+                    <View style={styles.upperSection}>
 
-                    <View style={styles.widget}>
-                        <Text style={styles.widgetTitle}>Workouts</Text>
-                        <View style={styles.widgetSpan}>
-                            <Text style={{fontSize: 20}}>{workoutsAmount}</Text>
+                        <View style={styles.widget}>
+                            <Text style={styles.widgetTitle}>Workouts</Text>
+                            <View style={styles.widgetSpan}>
+                                <Text style={{fontSize: 20}}>{workoutsAmount}</Text>
+                            </View>
+                            <Icon name="barbell" size={60}/>
                         </View>
-                        <Icon name="barbell" size={60}/>
+
+                        <View style={styles.widget}>
+                            <Text style={styles.widgetTitle}>Workouts</Text>
+                            <View>
+                                <Text style={{fontSize: 20}}>64</Text>
+                            </View>
+                            <Icon name="barbell" size={60}/>
+                        </View>
+
                     </View>
 
-                    <View style={styles.widget}>
-                        <Text style={styles.widgetTitle}>Workouts</Text>
-                        <View>
-                            <Text style={{fontSize: 20}}>64</Text>
-                        </View>
-                        <Icon name="barbell" size={60}/>
-                    </View>
+                    <ProgressChart/>
 
+                    <PieChartGraph/>
+
+                    <TouchableOpacity style={styles.RMcalcWidget} onPress={() => setRMcalcVisible(true)}>
+                        <Icon2 name="weight-lifter" size={34} color={'#000000'}/>
+                        <Text style={{fontSize: 24, fontWeight: '500'}}>Calculate your 1 RM</Text>
+                    </TouchableOpacity>
                 </View>
-
-                <ProgressChart/>
-
-                <TouchableOpacity style={styles.RMcalcWidget} onPress={() => setRMcalcVisible(true)}>
-                    <Icon2 name="weight-lifter" size={34} color={'#000000'}/>
-                    <Text style={{fontSize: 24, fontWeight: '500'}}>Calculate your 1 RM</Text>
-                </TouchableOpacity>
-            </View>
-            <RMcalculator isVisible={RMcalcVisible} setIsVisible={setRMcalcVisible}/>
+                <RMcalculator isVisible={RMcalcVisible} setIsVisible={setRMcalcVisible}/>
+            </ScrollView>
 
         </View>
     )
