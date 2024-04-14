@@ -53,22 +53,45 @@ const ProgressChart = () => {
     const labels = logs.map(log => log.date);
     const weights = logs.map(log => {
       const parsedWeights = log.weights.split('/').map(weight => parseFloat(weight));
+      console.log('Parsed weights:', parsedWeights);
       return parsedWeights;
     });
-    console.log(weights)
     const reps = logs.map(log => {
       const parsedReps = log.reps.split('/').map(rep => parseInt(rep));
+      console.log('Parsed reps:', parsedReps);
       return parsedReps;
     });
-    console.log(reps)
-    const oneRepMax = weights.map((weight, index) => calculate1RM(weight, reps[index]));
-    return { labels, data: oneRepMax };
-  }
+    
+    const oneRepMax = weights.map((weight, index) => {
+      const repsForExercise = reps[index];
+      if (repsForExercise.length === 1) {
+        // If only one rep is provided, use the same weight for all reps
+        return calculate1RM(weight[0], repsForExercise[0]);
+      } else {
+        // If multiple reps are provided, repeat the last weight for the remaining reps
+        const oneRepMaxForExercise = repsForExercise.map((rep, repIndex) => {
+          const weightIndex = Math.min(repIndex, weight.length - 1);
+          return calculate1RM(weight[weightIndex], rep);
+        });
+        return oneRepMaxForExercise;
+      }
+    });
+  
+    const data = labels.map((label, index) => {
+      const sum = oneRepMax[index].reduce((acc, val) => acc + val, 0);
+      const average = sum / oneRepMax[index].length;
+      return average;
+    });
+  
+    return { labels, data: [data] };
+  }  
 
   useEffect(() => {
     if (selectedExerciseData.length > 0) {
       const filteredLogs = filterLogsByTimeScale(selectedExerciseData);
       const chartData = prepareChartData(filteredLogs);
+      console.log(chartData)
+      setChartData(chartData)
     }
   }, [selectedExerciseData, timeScale]);
 
@@ -138,7 +161,7 @@ const ProgressChart = () => {
           labels: chartData.labels,
           datasets: [
             {
-              data: chartData.data.length > 0 ? chartData.data : [0]
+              data: chartData.data.length > 0 ? chartData.data[0] : [0]
             }
           ]
         }}
