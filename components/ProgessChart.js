@@ -50,7 +50,10 @@ const ProgressChart = () => {
   }
 
   const prepareChartData = (logs) => {
-    const labels = logs.map(log => log.date);
+    const labels = logs.map(log => {
+      const [year, month, day] = log.date.split('/').map(Number);
+      return `${month}/${day}`; // Format as "month/day"
+    });
     const weights = logs.map(log => {
       const parsedWeights = log.weights.split('/').map(weight => parseFloat(weight));
       console.log('Parsed weights:', parsedWeights);
@@ -61,12 +64,12 @@ const ProgressChart = () => {
       console.log('Parsed reps:', parsedReps);
       return parsedReps;
     });
-    
+  
     const oneRepMax = weights.map((weight, index) => {
       const repsForExercise = reps[index];
       if (repsForExercise.length === 1) {
         // If only one rep is provided, use the same weight for all reps
-        return calculate1RM(weight[0], repsForExercise[0]);
+        return [calculate1RM(weight[0], repsForExercise[0])]; // Wrap in an array
       } else {
         // If multiple reps are provided, repeat the last weight for the remaining reps
         const oneRepMaxForExercise = repsForExercise.map((rep, repIndex) => {
@@ -77,6 +80,8 @@ const ProgressChart = () => {
       }
     });
   
+    console.log('One rep max:', oneRepMax);
+  
     const data = labels.map((label, index) => {
       const sum = oneRepMax[index].reduce((acc, val) => acc + val, 0);
       const average = sum / oneRepMax[index].length;
@@ -84,7 +89,7 @@ const ProgressChart = () => {
     });
   
     return { labels, data: [data] };
-  }  
+  }
 
   useEffect(() => {
     if (selectedExerciseData.length > 0) {
