@@ -37,7 +37,7 @@ const WorkoutSection = () => {
 
     const addWorkoutSplit = async () => {
         try{
-            db.withTransactionAsync(async () => {
+            await db.withTransactionAsync(async () => {
                 await db.runAsync('INSERT INTO WorkoutSplits (workout_split_name) VALUES (?)', [newWorkoutSplit])
             })
             await getWorkoutSplits();

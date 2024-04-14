@@ -97,7 +97,6 @@ const ProgressChart = () => {
     if (selectedExerciseData.length > 0) {
       const filteredLogs = filterLogsByTimeScale(selectedExerciseData);
       const chartData = prepareChartData(filteredLogs);
-      console.log(chartData)
       setChartData(chartData)
     }
   }, [selectedExerciseData, timeScale]);

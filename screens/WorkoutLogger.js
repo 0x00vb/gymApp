@@ -55,7 +55,6 @@ const WorkoutLogger = (props) => {
         setExpandedCard((cardIndex) === expandedCard ? null : (cardIndex));
     }
 
-    
     const [editLogModalVisible, setEditLogModalVisible] = useState(false);
     const hanldeEditLog = (logId) => {
         setSelectedExerciseLogId(logId);
@@ -64,8 +63,8 @@ const WorkoutLogger = (props) => {
     
     const handleAddExercise = async () => {
         try{    
-            db.withTransactionAsync(async () => {
-                await db.runAsync('INSERT INTO Exercises (workout_day_id, exercise_name) VALUES (?, ?)', [workoutDay_id, exerciseText]);
+            await db.withTransactionAsync(async () => {
+                await db.runAsync('INSERT INTO Exercises (workout_day_id, exercise_name) VALUES (?, ?)', [workoutDay_id, exerciseText.toLocaleLowerCase()]);
             });
             await getExercises();
             setAddExerciseModalVisible(false);
