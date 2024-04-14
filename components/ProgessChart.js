@@ -50,37 +50,39 @@ const ProgressChart = () => {
   }
 
   const prepareChartData = (logs) => {
-    const labels = logs.map(log => {
+    // Extracting and sorting dates
+    const datesWithWeightsReps = logs.map(log => {
       const [year, month, day] = log.date.split('/').map(Number);
-      return `${month}/${day}`; // Format as "month/day"
+      const date = new Date(year, month - 1, day);
+      const weights = log.weights.split('/').map(weight => parseFloat(weight));
+      const reps = log.reps.split('/').map(rep => parseInt(rep));
+      return { date, weights, reps };
     });
-    const weights = logs.map(log => {
-      const parsedWeights = log.weights.split('/').map(weight => parseFloat(weight));
-      console.log('Parsed weights:', parsedWeights);
-      return parsedWeights;
-    });
-    const reps = logs.map(log => {
-      const parsedReps = log.reps.split('/').map(rep => parseInt(rep));
-      console.log('Parsed reps:', parsedReps);
-      return parsedReps;
+    datesWithWeightsReps.sort((a, b) => a.date - b.date); // Sort dates in ascending order
+  
+    // Formatting sorted dates and synchronizing weights and reps
+    const labels = [];
+    const weights = [];
+    datesWithWeightsReps.forEach(item => {
+      const month = item.date.getMonth() + 1;
+      const day = item.date.getDate();
+      labels.push(`${month}/${day}`);
+      weights.push(item.weights);
     });
   
-    const oneRepMax = weights.map((weight, index) => {
-      const repsForExercise = reps[index];
+    // Prepare other chart data
+    const oneRepMax = weights.map((weightArr, index) => {
+      const repsForExercise = datesWithWeightsReps[index].reps;
       if (repsForExercise.length === 1) {
-        // If only one rep is provided, use the same weight for all reps
-        return [calculate1RM(weight[0], repsForExercise[0])]; // Wrap in an array
+        return [calculate1RM(weightArr[0], repsForExercise[0])];
       } else {
-        // If multiple reps are provided, repeat the last weight for the remaining reps
         const oneRepMaxForExercise = repsForExercise.map((rep, repIndex) => {
-          const weightIndex = Math.min(repIndex, weight.length - 1);
-          return calculate1RM(weight[weightIndex], rep);
+          const weightIndex = Math.min(repIndex, weightArr.length - 1);
+          return calculate1RM(weightArr[weightIndex], rep);
         });
         return oneRepMaxForExercise;
       }
     });
-  
-    console.log('One rep max:', oneRepMax);
   
     const data = labels.map((label, index) => {
       const sum = oneRepMax[index].reduce((acc, val) => acc + val, 0);
@@ -90,7 +92,7 @@ const ProgressChart = () => {
   
     return { labels, data: [data] };
   }
-
+  
   useEffect(() => {
     if (selectedExerciseData.length > 0) {
       const filteredLogs = filterLogsByTimeScale(selectedExerciseData);
