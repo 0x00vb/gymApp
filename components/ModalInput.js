@@ -4,7 +4,7 @@ import Modal from 'react-native-modal';
 
 const ModalInput = ({ title, buttonText, setText, placeholder, inputValue, modalVisible, setModalVisible, onSubmit }) => {
     return(
-        <Modal isVisible={modalVisible} style={styles.modalView} onBackdropPress={() => setModalVisible(false)}>
+        <Modal isVisible={modalVisible} style={styles.modalView} onBackdropPress={() => {setText("");setModalVisible(false)}}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : null}
             >

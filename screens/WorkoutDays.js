@@ -43,6 +43,7 @@ const WorkoutLogger = (props) => {
                 await db.runAsync('INSERT INTO WorkoutDays (workout_splits_id, workout_day_name) VALUES (?, ?)', [workoutSplit_id, dayInput])
             });
             await getWorkoutDays();
+            setDayInput("")
             setModalVisible(false);
         }catch(e){
             console.log(e);
@@ -91,13 +92,10 @@ const WorkoutLogger = (props) => {
                             </TouchableOpacity>
                         ))
                     }
-
-
                     {/* -------  */}
                     <TouchableOpacity style={styles.addDay} activeOpacity={0.6} onPress={toggleModal}>
                         <Text style={{color: '#f1f1f1', fontSize: 22, fontWeight: '700'}}>Add Day</Text>
                     </TouchableOpacity>
-
                 </ScrollView>
                 <ModalInput
                     title={'Add Day'}
@@ -111,7 +109,6 @@ const WorkoutLogger = (props) => {
                 />
             </View>
         </TouchableWithoutFeedback>
-
     )
 }
 

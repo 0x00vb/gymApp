@@ -42,7 +42,7 @@ const WorkoutSection = () => {
             })
             await getWorkoutSplits();
             setModalVisible(false);
-            setLongPressed();
+            setNewWorkoutSplit("");
         }catch(e){
             console.log(e);
         }
@@ -61,6 +61,7 @@ const WorkoutSection = () => {
                 await db.runAsync('DELETE FROM WorkoutSplits WHERE id = ?', [workoutSplitId]);
             });
             await getWorkoutSplits();
+            setLongPressed(null);
         } catch (e) {
             console.log('Error deleting workout split and related data:', e);
         }
@@ -71,7 +72,6 @@ const WorkoutSection = () => {
             <View>
                 <Topbar title={'Workouts'} setModalVisible={setModalVisible}/>
                 <ScrollView contentContainerStyle={styles.workoutsList}>
-
                     {
                         workoutSplits.map((item, index) => (
                             <TouchableOpacity
@@ -81,7 +81,6 @@ const WorkoutSection = () => {
                                 onLongPress={() => showDeleteButton(index)}
                             >
                                 <Text style={styles.workoutSplitTitle}>{item.workout_split_name}</Text>
-                                <Text style={styles.workoutSplitFrec}>6 days/week</Text>
                                 <Animated.View style={[styles.trashIconContainer, {right: longPressed == index ? animationProgress : -100}]}>
                                     <TouchableOpacity
                                         onPress={() => console.log(removeWorkoutSplit(item.id))}
@@ -91,12 +90,15 @@ const WorkoutSection = () => {
                                     </TouchableOpacity>
                                 </Animated.View>
                             </TouchableOpacity>
-
                         ))
                     }
 
                 </ScrollView>
-                <Modal isVisible={modalVisible} style={styles.modalView} onBackdropPress={() => setModalVisible(false)}>
+                <Modal 
+                    isVisible={modalVisible} 
+                    style={styles.modalView} 
+                    onBackdropPress={() => {setNewWorkoutSplit("");setModalVisible(false)}}
+                >
                     <KeyboardAvoidingView
                         behavior={Platform.OS === 'ios' ? 'padding' : null}
                     >
@@ -107,10 +109,6 @@ const WorkoutSection = () => {
                                 placeholder="Workout name"
                                 value={newWorkoutSplit}
                                 onChangeText={(text) => setNewWorkoutSplit(text)}
-                            />
-                            <TextInput
-                                style={styles.input}
-                                placeholder=""
                             />
                             <TouchableOpacity onPress={() => addWorkoutSplit()} style={styles.saveButton} activeOpacity={0.6}>
                                 <Text style={{fontSize: 18, fontWeight: '700', color: '#f1f1f1'}}>Save workout</Text>
@@ -135,9 +133,9 @@ const styles = StyleSheet.create({
         height: 80,
         backgroundColor: '#D9D9D9',
         borderRadius: 10,
-        paddingTop: 10,
-        paddingLeft: 15,
+        paddingLeft: 20,
         gap: 3,
+        justifyContent: 'center',
         shadowColor: '#000000',
         shadowOffset: { width: 0, height: 4 },
         shadowRadius: 4,
@@ -145,11 +143,8 @@ const styles = StyleSheet.create({
         overflow: 'hidden'
     },
     workoutSplitTitle: {
-        fontSize: 22,
-        fontWeight: '500'
-    },
-    workoutSplitFrec: {
-        fontSize: 14
+        fontSize: 24,
+        fontWeight: '600'
     },
     modalView: {
         margin: 0,

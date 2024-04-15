@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Animated } from 'react-native';
 import useDeleteButtonAnimation from "../hooks/useDeleteButtonAnimation";
 import Topbar from "../components/Topbar";
@@ -17,6 +17,7 @@ const WorkoutLogger = (props) => {
     const [selectedExerciseId, setSelectedExerciseId] = useState();
     const [selectedExerciseName, setSelectedExerciseName] = useState();
     const [selectedExerciseLogId, setSelectedExerciseLogId] = useState(null);
+    const expandedCardAnimation = useRef(new Animated.Value(0)).current;
     
     const db = useSQLiteContext();
 
@@ -52,7 +53,13 @@ const WorkoutLogger = (props) => {
 
     const hanldeCardPress = async (cardIndex, cardId) => {
         await getExerciseLogs(cardId);
-        setExpandedCard((cardIndex) === expandedCard ? null : (cardIndex));
+        const isCardAlreadyExpanded = (cardIndex === expandedCard);
+        setExpandedCard(isCardAlreadyExpanded ? null : cardIndex);
+    
+        // Determine the target height based on whether the card is already expanded
+        const targetHeight = isCardAlreadyExpanded ? 0 : 400;
+    
+        Animated.timing(expandedCardAnimation, { toValue: targetHeight, duration: 600, useNativeDriver: false }).start();
     }
 
     const [editLogModalVisible, setEditLogModalVisible] = useState(false);
@@ -97,7 +104,7 @@ const WorkoutLogger = (props) => {
                                 style={styles.workoutCard}
                                 activeOpacity={0.6}
                                 onPress={() => hanldeCardPress(index, item.id)}
-                                onLongPress={() => showDeleteButton(index)}
+                                onLongPress={() => expandedCard !== index && showDeleteButton(index)}
                                 key={item.id}
                             >
                                 <Text style={styles.workoutTitle}>{item.exercise_name}</Text>
@@ -111,9 +118,9 @@ const WorkoutLogger = (props) => {
                                 </Animated.View>
 
                                 {
-                                    expandedCard === index && (
-                                        <View>
-                                            <View style={styles.workoutCardExpandedGridContainer}>
+                                    expandedCard === index && longPressed !== index && (
+                                        <View > 
+                                            <Animated.View style={[styles.workoutCardExpandedGridContainer, {maxHeight: expandedCard === index && expandedCardAnimation}]}>
                                                 <View style={styles.gridHeader}>
                                                     <Text style={styles.gridHeaderText}>Sets</Text>
                                                     <Text style={styles.gridHeaderText}>Weight</Text>
@@ -143,7 +150,7 @@ const WorkoutLogger = (props) => {
                                                         ))
                                                     }
                                                 </ScrollView>
-                                            </View>
+                                            </Animated.View>
                                             <TouchableOpacity
                                                 style={styles.addWorkout}
                                                 onPress={() => {toggleLogModal(item.id), setSelectedExerciseName(item.exercise_name)}}>
@@ -236,10 +243,9 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
     },
     workoutCardExpandedGridContainer: {
+        
         alignSelf: 'center',
         backgroundColor: '#f1f1f1',
-        maxHeight: 400,
-        height: 'auto',
         width: '98%',
         paddingBottom: 10,
         borderRadius: 10

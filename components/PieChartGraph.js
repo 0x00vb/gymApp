@@ -33,7 +33,6 @@ const PieChartGraph = () => {
             }
         }
         getTopExercises();
-        console.log(chartData)
     }, [])
 
     return(

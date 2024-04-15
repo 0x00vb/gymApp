@@ -33,7 +33,6 @@ const StatsScreen = () => {
             <ScrollView contentContainerStyle={{paddingBottom: 175}}>
                 <View style={styles.widgetsContainer}>
                     <View style={styles.upperSection}>
-
                         <View style={styles.widget}>
                             <Text style={styles.widgetTitle}>Workouts</Text>
                             <View style={styles.widgetSpan}>
@@ -41,7 +40,6 @@ const StatsScreen = () => {
                             </View>
                             <Icon name="barbell" size={60}/>
                         </View>
-
                         <View style={styles.widget}>
                             <Text style={styles.widgetTitle}>Workouts</Text>
                             <View>
@@ -49,11 +47,9 @@ const StatsScreen = () => {
                             </View>
                             <Icon name="barbell" size={60}/>
                         </View>
-
                     </View>
 
                     <ProgressChart/>
-
                     <PieChartGraph/>
 
                     <TouchableOpacity style={styles.RMcalcWidget} onPress={() => setRMcalcVisible(true)}>
@@ -63,7 +59,6 @@ const StatsScreen = () => {
                 </View>
                 <RMcalculator isVisible={RMcalcVisible} setIsVisible={setRMcalcVisible}/>
             </ScrollView>
-
         </View>
     )
 }
@@ -100,17 +95,17 @@ const styles = StyleSheet.create({
         textShadowColor: 'rgba(0, 0, 0, 0.25)',
         textShadowOffset: {width: -0.2, height: 0.2},
         textShadowRadius: 10,
-        marginTop: 5,
+        marginTop: 10,
         marginBottom: 10,
         textAlign: 'center'
     },
     widgetSpan: {
-        backgroundColor: '#F9F1F9',
+        backgroundColor: '#e6e6e6',
         padding: 3,
         borderRadius: 100,
         aspectRatio: '1/1',
         alignItems: 'center',
-        shadowColor: 'rgba(0, 0, 0, 0.75)',
+        shadowColor: 'rgba(0, 0, 0, 0.6)',
         elevation: 7, // android
         shadowOffset: {
             height: 1,
