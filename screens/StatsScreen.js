@@ -3,10 +3,11 @@ import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-nati
 import Topbar from "../components/Topbar";
 import Icon from "react-native-vector-icons/Ionicons";
 import Icon2 from "react-native-vector-icons/MaterialCommunityIcons";
-import RMcalculator from "../components/RMcalculator";
-import ProgressChart from "../components/ProgessChart";
 import { useSQLiteContext } from "expo-sqlite/next";
+import ProgressChart from "../components/ProgessChart";
 import PieChartGraph from "../components/PieChartGraph";
+import RMcalculator from "../components/RMcalculator";
+import StopWatch from '../components/StopWatch';
 
 const StatsScreen = () => {
     const [RMcalcVisible, setRMcalcVisible] = useState(false);
@@ -40,12 +41,11 @@ const StatsScreen = () => {
                             </View>
                             <Icon name="barbell" size={60}/>
                         </View>
-                        <View style={styles.widget}>
-                            <Text style={styles.widgetTitle}>Workouts</Text>
-                            <View>
-                                <Text style={{fontSize: 20}}>64</Text>
-                            </View>
-                            <Icon name="barbell" size={60}/>
+                        <View style={[styles.widget, {backgroundColor: '#2d2d2d'}]}>
+                            <Text style={styles.widgetTitle}>
+                                Rest timer
+                            </Text>
+                            <StopWatch/>
                         </View>
                     </View>
 
