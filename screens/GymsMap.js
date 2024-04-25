@@ -5,7 +5,7 @@ import * as Location from 'expo-location';
 import Topbar from "../components/Topbar";
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const GOOGLE_MAPS_API_KEY = "AIzaSyDsYaElHqKEYbjpjglRk37iQBNv-UHgftA";
+const GOOGLE_MAPS_API_KEY = "YOUR_API_HERE";
 
 function GymsMap() {
     const [initialRegion, setInitialRegion] = useState(null);
