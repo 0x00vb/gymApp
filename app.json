@@ -5,7 +5,13 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+<<<<<<< HEAD
     "splash": {},
+=======
+    "splash": {
+        "backgroundColor": "#D9D9D9"
+    },
+>>>>>>> 23646403ef8761cc1360cb88213d1d932c19e6cd
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -18,9 +24,14 @@
         "backgroundColor": "#ffffff"
       },
       "config": {
+<<<<<<< HEAD
         "googleMapsApiKey": "AIzaSyDsYaElHqKEYbjpjglRk37iQBNv-UHgftA"
       },
       "package": "com.valentinobalatti4.gymApp"
+=======
+        "googleMapsApiKey": "YOUR_API_HERE" 
+    }
+>>>>>>> 23646403ef8761cc1360cb88213d1d932c19e6cd
     },
     "web": {},
     "extra": {

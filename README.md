@@ -20,13 +20,3 @@ Why Choose GymMaster Pro?
     Comprehensive Tracking: From workout logs to progress charts, GymMaster Pro provides comprehensive tracking tools to help you stay accountable and motivated on your fitness journey.  📊💪
 
     Community Support: Join a vibrant community of fitness enthusiasts, sharing tips, insights, and inspiration to help you stay motivated and connected.  🌟🤝
-
-Get Started Today!
-
-Ready to take your fitness journey to the next level? Download GymMaster Pro now and unleash your full potential!
-
-Download GymMaster Pro
-
-For more information and support, visit our website: XXX.com
-
-Let GymMaster Pro be your ultimate partner in achieving your fitness dreams. Get started today and embark on a journey to a stronger, healthier you!
