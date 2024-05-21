@@ -5,25 +5,28 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "splash": {
-
-    },
+    "splash": {},
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.valentinobalatti4.gymApp"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
       },
       "config": {
-        "googleMapsApiKey": "AIzaSyDsYaElHqKEYbjpjglRk37iQBNv-UHgftA" 
-    }
+        "googleMapsApiKey": "AIzaSyDsYaElHqKEYbjpjglRk37iQBNv-UHgftA"
+      },
+      "package": "com.valentinobalatti4.gymApp"
     },
-    "web": {
-
+    "web": {},
+    "extra": {
+      "eas": {
+        "projectId": "20bb9c1b-c8ab-433b-9032-d7cce39375c9"
+      }
     }
   }
 }
