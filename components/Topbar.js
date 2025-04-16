@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Platform } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 
 const Topbar = (props) => {
@@ -12,8 +12,22 @@ const Topbar = (props) => {
                 <Text style={[styles.topbarText, Platform.OS == "android" && {marginTop: 15}]}>{title}</Text>
                 { 
                     title === 'Workouts' && 
-                        <TouchableOpacity style={{position: 'absolute', right: '5%', bottom: 0}} onPress={() => props.setModalVisible(true)}>
-                            <Icon name="plus" size={30} color={'#228CDB'}/>
+                        <TouchableOpacity
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                position: 'absolute', 
+                                right: '5%', 
+                                bottom: 0,
+                                width: 35,
+                                height: 35,
+                                borderRadius: 50,
+                                backgroundColor: '#18263E',
+                            }}
+                            onPress={() => props.setModalVisible(true)}
+                        >
+                            <Icon name="add" size={23} color={'#3C83F6'}/>
                         </TouchableOpacity>
                 }
             </View>
@@ -31,23 +45,20 @@ const Topbar = (props) => {
 
 const styles = StyleSheet.create({
     topbarContainer: {
-        backgroundColor: '#2d2d2d',
-        alignItems: 'center',
-        top: 0,
+        backgroundColor: '01050e',
         minHeight: 10,
         height: 'auto',
         width: '100%',
         flexDirection: 'column',
-        borderBottomEndRadius: 20,
-        borderBottomLeftRadius: 20,
-        gap: 10
+
     },
     topbarHeader: {
         width: '100%',
         flexDirection: 'row',
         marginTop: 20,
-        justifyContent: 'center',
-        marginBottom: 5
+        marginBottom: 5,
+        paddingLeft: 20,
+
     },
     topbarText: {
         color: '#f1f1f1',

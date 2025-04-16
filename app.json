@@ -5,39 +5,33 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-<<<<<<< HEAD
     "splash": {},
-=======
-    "splash": {
-        "backgroundColor": "#D9D9D9"
-    },
->>>>>>> 23646403ef8761cc1360cb88213d1d932c19e6cd
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.valentinobalatti4.gymApp"
+      "bundleIdentifier": "com.valentinobalatti4.gymApp",
+      "newArchEnabled": true
     },
     "android": {
+      "newArchEnabled": true,
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
       },
       "config": {
-<<<<<<< HEAD
         "googleMapsApiKey": "AIzaSyDsYaElHqKEYbjpjglRk37iQBNv-UHgftA"
       },
       "package": "com.valentinobalatti4.gymApp"
-=======
-        "googleMapsApiKey": "YOUR_API_HERE" 
-    }
->>>>>>> 23646403ef8761cc1360cb88213d1d932c19e6cd
     },
     "web": {},
     "extra": {
       "eas": {
         "projectId": "20bb9c1b-c8ab-433b-9032-d7cce39375c9"
       }
-    }
+    },
+    "plugins": [
+      "expo-asset"
+    ]
   }
 }

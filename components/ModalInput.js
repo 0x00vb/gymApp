@@ -31,25 +31,27 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end'
     },
     modalContainer: {
-        backgroundColor: 'rgba(255,255,255,0.8)',
+        backgroundColor: '01050e',
         padding: 20
     },
     modalTitle: {
         fontSize: 22,
         fontWeight: '700',
-        marginBottom: 15
+        marginBottom: 15,
+        color: '#fdfdfd'
     },
     input: {
+        color: '#fdfdfd',
         height: 40,
         borderWidth: 1,
-        borderColor: '#228CDB',
+        borderColor: '#3C83F6',
         borderRadius: 10,
         marginBottom: 10,
         paddingHorizontal: 10
     },
     submit: {
         height: 40,
-        backgroundColor: '#228CDB',
+        backgroundColor: '#3C83F6',
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 10

@@ -1,18 +1,18 @@
 import {React, useEffect, useState} from 'react'
-import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, Dimensions } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
-import { useSQLiteContext } from "expo-sqlite/next";
+import { useDatabase } from "../context/DatabaseContext";
 
 const PieChartGraph = () => {
     const [chartData, setChartData] = useState([]);
     const colors = ["#228cdb", "#4cb1ff", "#aedcff"]
 
-    const db = useSQLiteContext();
+    const db = useDatabase();
 
     useEffect(() => {
         const getTopExercises = async () => {
             try{
-                const response = await db.getAllAsync(`
+                const response = await db.executeQuery(`
                     SELECT e.exercise_name, AVG(l.weights / (1.0278 - 0.0278 * CAST(l.reps AS INTEGER))) AS avg_1rm
                     FROM Logs l
                     INNER JOIN Exercises e ON l.exercise_id = e.id
@@ -38,7 +38,7 @@ const PieChartGraph = () => {
     return(
         <View>
             <View>
-                <Text style={{fontSize: 20, fontWeight: '600'}}>
+                <Text style={{fontSize: 20, fontWeight: '500', color: '#f8fafc', marginBottom: 10}}>
                     Strongest lifts
                 </Text>
             </View>
@@ -54,11 +54,12 @@ const PieChartGraph = () => {
                                 data={chartData}
                                 width={Dimensions.get("window").width - 40} // from react-native
                                 height={220}
-                                backgroundColor='#d9d9d980'
+                                backgroundColor='hsla(222, 61.90%, 8.20%, 0.34)'
+                                
                                 hasLegend={false}
                                 chartConfig={{
                                     decimalPlaces: 2,
-                                    color: (opacity = 1) => `rgba(33, 126, 194, ${opacity})`,
+                                    color: (opacity = 1) => `rgba(60, 131, 246, ${opacity})`,
                                     style: {
                                         borderRadius: 16
                                     },
@@ -66,6 +67,10 @@ const PieChartGraph = () => {
                                         r: "6",
                                         strokeWidth: "2",
                                         stroke: "#FFFFFF"
+                                    },
+                                    propsForLabels: {
+                                        fontSize: 14,
+                                        color: '#ffffff'
                                     }
                                 }}       
                                 style={{
@@ -76,7 +81,7 @@ const PieChartGraph = () => {
                                 paddingLeft="15"
                                 absolute
                             /> 
-                            <View style={{right: '60%', gap: 20}}>
+                            <View style={{right: '40%', gap: 20}}>
                             {
                                 chartData.map((item, index) => (
                                     <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}} key={index}>
@@ -84,8 +89,8 @@ const PieChartGraph = () => {
                                             style={[{width: 20, height: 20, borderRadius: "50%"}, {backgroundColor: item.color}]}
                                         ></View>
                                         <View style={{alignItems: 'center'}}>
-                                            <Text style={{fontSize: 14}}>{item.name}</Text>
-                                            <Text>{item.population}Kg</Text>
+                                            <Text style={{fontSize: 14, color: '#FDFDFD'}}>{item.name}</Text>
+                                            <Text style={{ color: '#FDFDFD'}}>{item.population}Kg</Text>
                                         </View>
                                     </View>
 

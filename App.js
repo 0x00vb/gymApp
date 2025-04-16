@@ -1,11 +1,8 @@
-import React from 'react';
-import { View, ActivityIndicator, Text} from 'react-native'
+import React, { Suspense, useEffect, useState } from 'react';import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useEffect, useState } from 'react';
-import openDatabase from './utils/db-service';
-import { SQLiteProvider, useSQLiteContext } from 'expo-sqlite/next'
-
+import { createNavigationContainerRef } from '@react-navigation/native';
+import { DatabaseProvider } from './context/DatabaseContext';
 import WorkoutSection from './screens/WorkoutsSection';
 import Menubar from './components/Menubar';
 import WorkoutDays from './screens/WorkoutDays';
@@ -14,38 +11,60 @@ import StatsScreen from './screens/StatsScreen';
 import GymsMap from './screens/GymsMap';
 
 const Stack = createNativeStackNavigator();
+export const navigationRef = createNavigationContainerRef();
+// Loading component
+const LoadingScreen = () => (
+  <View style={styles.loadingContainer}>
+    <ActivityIndicator size="large" color="#228CDB" />
+    <Text style={styles.loadingText}>Loading App...</Text>
+  </View>
+);
 
-export default function App() {   
-  const [dbLoaded, setDbLoaded] = useState(false);
+export default function App() {
+  const [currentRoute, setCurrentRoute] = useState('Workouts');
 
   useEffect(() => {
-    openDatabase()
-      .then(() => setDbLoaded(true))
-      .catch((e) => console.log(e))
-  }, [])
+    const interval = setInterval(() => {
+      if (navigationRef.isReady()) {
+        const route = navigationRef.getCurrentRoute();
+        if (route?.name && route.name !== currentRoute) {
+          setCurrentRoute(route.name);
+        }
+      }
+    }, 100); // Polling every 100ms (can optimize later)
 
-  if(!dbLoaded)
-    return(
-      <View style={{ flex: 1 }}>
-        <ActivityIndicator size={"large"} />
-        <Text>Loading Database...</Text>
-      </View>
-    )
+    return () => clearInterval(interval);
+  }, [currentRoute]);
 
   return (
-    <NavigationContainer>
-      <React.Suspense>
-        <SQLiteProvider databaseName='database.db' useSuspense>
-          <Stack.Navigator screenOptions={{headerShown: false}}>
-            <Stack.Screen name='Workouts' component={WorkoutSection}/>
-            <Stack.Screen name='WorkoutDays' component={WorkoutDays}/>
-            <Stack.Screen name='WorkoutLogger' component={WorkoutLogger}/>
-            <Stack.Screen name='Stats' component={StatsScreen}/>
-            <Stack.Screen name='GymsMap' component={GymsMap}/>
+    <NavigationContainer ref={navigationRef}>
+      <Suspense fallback={<LoadingScreen />}>
+        <DatabaseProvider>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Workouts" component={WorkoutSection} />
+            <Stack.Screen name="WorkoutDays" component={WorkoutDays} />
+            <Stack.Screen name="WorkoutLogger" component={WorkoutLogger} />
+            <Stack.Screen name="Stats" component={StatsScreen} />
+            <Stack.Screen name="GymsMap" component={GymsMap} />
           </Stack.Navigator>
-        </SQLiteProvider>
-      </React.Suspense>
-      <Menubar/>
+        </DatabaseProvider>
+      </Suspense>
+      <Menubar currentRoute={currentRoute} />
     </NavigationContainer>
   );
 }
+
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#333',
+  },
+});

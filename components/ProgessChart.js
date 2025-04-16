@@ -2,7 +2,8 @@ import {React, useEffect, useState} from 'react'
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import DropdownSelect from 'react-native-input-select';
-import { useSQLiteContext } from "expo-sqlite/next";
+import { useDatabase } from "../context/DatabaseContext";
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const calculate1RM = (weight, reps) => {
   return weight / (1.0278 - 0.0278 * reps);
@@ -14,11 +15,11 @@ const ProgressChart = () => {
   const [selectedExerciseData, setSelectedExerciseData] = useState([]);
   const [timeScale, setTimeScale] = useState(1); // 1 month
 
-  const db = useSQLiteContext();
+  const db = useDatabase();
 
   useEffect(() => {
     const getExercises = async () => {
-      const response = await db.getAllAsync('SELECT DISTINCT exercise_name FROM Exercises');
+      const response = await db.executeQuery('SELECT DISTINCT exercise_name FROM Exercises');
       setExercisesList(response.map(item => item.exercise_name));
     };
     getExercises();
@@ -39,7 +40,7 @@ const ProgressChart = () => {
   const getExerciseLogsData = async (exerciseName) => {
     setSelectedExercise(exerciseName);
     try{
-        const response = await db.getAllAsync(
+        const response = await db.executeQuery(
           'SELECT * FROM Logs WHERE exercise_id IN (SELECT id FROM Exercises WHERE exercise_name = ?)',
           [exerciseName]
         );
@@ -104,62 +105,66 @@ const ProgressChart = () => {
   const [chartData, setChartData] = useState({ labels: [], data: [] });
   return (
     <View>
-      <View style={{width: '100%', flexDirection: 'row', marginBottom: -20, gap: 10}}>
-        <Text style={{fontSize: 20, fontWeight: '600'}}>Progress Chart</Text>
-        <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
-          <DropdownSelect
-          dropdownContainerStyle={{width: 'auto'}}
-            dropdownStyle={styles.dropdown}
-            placeholderStyle={{fontSize: 16}}
-            selectedItemStyle={{fontSize: 16}}
-            checkboxControls={{
-              checkboxLabelStyle: {
-                fontSize: 18,
-                paddingBottom: 5,
-              },
-              checkboxStyle: {
-                backgroundColor: '#228CDB',
-                borderColor: '#228CDB',
-              },
-              checkboxSize: 18
-            }}
-            dropdownIconStyle={{opacity: 0}}
-            placeholder='Exercise'
-            options={
-              exercisesList.map(exercise => ({
-                value: exercise,
-                label: exercise
-              }))
-            }
-            onValueChange={(exerciseName) => getExerciseLogsData(exerciseName)}
-            selectedValue={selectExercise}
-          />
-          <DropdownSelect
-            dropdownStyle={{width: 80, minHeight: 20, paddingVertical: 0,paddingHorizontal: 0, alignItems: 'center', marginLeft: 0}}
-            placeholderStyle={{fontSize: 16}}
-            selectedItemStyle={{fontSize: 16}}
-            checkboxControls={{
-              checkboxLabelStyle: {
-                fontSize: 18,
-                paddingBottom: 5,
-              },
-              checkboxStyle: {
-                backgroundColor: '#228CDB',
-                borderColor: '#228CDB',
-              },
-              checkboxSize: 18
-            }}
-            dropdownIconStyle={{opacity: 0}}
-            placeholder='Select time scale'
-            options={[
-              { value: 1, label: '1 Month' },
-              { value: 3, label: '3 Months' },
-              { value: 6, label: '6 Months' },
-              { value: 12, label: '12 Months' }
-            ]}
-            onValueChange={(value) => setTimeScale(value)}
-            selectedValue={timeScale}
-          />
+      <View style={{width: '100%', flexDirection: 'column', marginBottom: -20, gap: 10}}>
+        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+          <Text style={{fontSize: 20, fontWeight: '500', color: '#f8fafc'}}>Progress Chart</Text>
+          <Icon name="chart-line-variant" size={24} color="#3C83F6" />
+        </View>
+        <View style={{ flexDirection:'row', alignItems: 'center', justifyContent: 'space-between', gap: 5}}>
+          <View style={{flexShrink: 1}}>
+            <DropdownSelect
+            dropdownContainerStyle={{width: 130}}
+              dropdownStyle={styles.dropdown}
+              placeholderStyle={{fontSize: 16, fontWeight: '500', color: '#7f7f7f'}}
+              selectedItemStyle={{fontSize: 16, fontWeight: '500', color: '#7f7f7f'}}
+              checkboxControls={{
+                checkboxLabelStyle: {
+                  fontSize: 18,
+                  paddingBottom: 5,
+                },
+                checkboxStyle: {
+                  backgroundColor: '#228CDB',
+                  borderColor: '#228CDB',
+                },
+                checkboxSize: 18
+              }}
+              dropdownIconStyle={{opacity: 0}}
+              placeholder='Exercise'
+              options={
+                exercisesList.map(exercise => ({
+                  value: exercise,
+                  label: exercise
+                }))
+              }
+              onValueChange={(exerciseName) => getExerciseLogsData(exerciseName)}
+              selectedValue={selectExercise}
+            />
+          </View>
+          <View style={{ flexDirection: 'row', gap: 8}}>
+            {[1, 3, 6, 12].map((val) => (
+              <TouchableOpacity
+                key={val}
+                onPress={() => setTimeScale(val)}
+                style={{
+                  paddingVertical: 0,
+                  paddingHorizontal: 12,
+                  backgroundColor: timeScale === val ? '#3C83F6' : '#2f2f2f',
+                  borderRadius: 8,
+                }}
+              >
+                <Text
+                  style={{
+                    color: timeScale === val ? '#F7F7F7' : '#7F7F7F',
+                    fontSize: 16,
+                    fontWeight: timeScale === val ? 'bold' : 'normal',
+                  }}
+                >
+                  {val}M
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
         </View>
       </View>
       <LineChart
@@ -176,9 +181,9 @@ const ProgressChart = () => {
         yAxisSuffix="Kg"
         yAxisInterval={1} // optional, defaults to 1
         chartConfig={{
-          backgroundColor: "#D9D9D9",
-          backgroundGradientFrom: "#D9D9D9",
-          backgroundGradientTo: "#F1F1F1",
+          backgroundColor: "hsl(223, 84%, 3%)",
+          backgroundGradientFrom: "hsl(223, 84%, 3%)",
+          backgroundGradientTo: "hsl(222, 100.00%, 8.40%)",
           decimalPlaces: 2, // optional, defaults to 2dp
           color: (opacity = 1) => `rgba(33, 126, 194, ${opacity})`,
           labelColor: (opacity = 1) => `rgba(33, 126, 194, ${opacity})`,
@@ -204,6 +209,7 @@ const ProgressChart = () => {
 
 const styles = StyleSheet.create({
   dropdown: {
+    backgroundColor: '#2f2f2f',
     width: 80,
     minHeight: 20,
     paddingVertical: 0,

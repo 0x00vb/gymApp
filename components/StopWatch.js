@@ -1,72 +1,86 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableHighlight } from 'react-native';
-import { Stopwatch, Timer } from 'react-native-stopwatch-timer';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { Stopwatch } from 'react-native-stopwatch-timer';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const StopWatch = () => {
-  const [timerStart, setTimerStart] = useState(false);
   const [stopwatchStart, setStopwatchStart] = useState(false);
-  const [totalDuration] = useState(90000);
-  const [timerReset, setTimerReset] = useState(false);
   const [stopwatchReset, setStopwatchReset] = useState(false);
-
-  const toggleTimer = () => {
-    setTimerStart(!timerStart);
-    setTimerReset(false);
-  }
-
-  const resetTimer = () => {
-    setTimerStart(false);
-    setTimerReset(true);
-  }
+  const [displayTime, setDisplayTime] = useState('00:00');
 
   const toggleStopwatch = () => {
-    setStopwatchStart(!stopwatchStart);
+    setStopwatchStart(prev => !prev);
     setStopwatchReset(false);
-  }
+  };
 
   const resetStopwatch = () => {
     setStopwatchStart(false);
     setStopwatchReset(true);
-  }
+    setDisplayTime('00:00');
+  };
 
   return (
-    <View style={{alignItems: 'center', width: "100%"}}>
+    <View style={styles.container}>
+      {/* Hidden Stopwatch just to drive time updates */}
       <Stopwatch
-        laps
         start={stopwatchStart}
         reset={stopwatchReset}
-        options={options}
+        options={{ container: { display: 'none' } }} // Hide the original display
+        msecs={false}
+        getTime={(time) => {
+          const [, mm, ss] = time.split(':'); // Ignore hours
+          setDisplayTime(`${mm}:${ss}`);
+        }}
       />
-      <View style={{flexDirection: 'row', gap: 10, marginTop: 5}}>
-        <TouchableHighlight onPress={toggleStopwatch} style={styles.controlBtn}>
-            <Text style={{fontSize: 18, fontWeight: '600', color: '#fff'}}>{!stopwatchStart ? "Start" : "Stop"}</Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={resetStopwatch} style={styles.controlBtn}>
-            <Text style={{fontSize: 18, fontWeight: '600', color: '#fff'}}>Reset</Text>
-        </TouchableHighlight>
+      
+      {/* Custom time display */}
+      <Text style={styles.timeText}>{displayTime}</Text>
+
+      <View style={styles.controls}>
+        <TouchableOpacity onPress={toggleStopwatch} style={styles.controlBtn}>
+          <Text style={styles.controlText}>
+            {
+            stopwatchStart ?           
+              <Icon name="pause" size={24} color="#fff" />
+                : 
+                <Icon name="play" size={24} color="#fff" />
+
+              }
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={resetStopwatch} style={styles.controlBtn}>
+          <Icon name="refresh" size={24} color="#fff" />
+        </TouchableOpacity>
       </View>
     </View>
   );
-}
-
-const styles = StyleSheet.create({
-    controlBtn: {
-    }
-})
-
-const options = {
-  container: {
-    backgroundColor: '#2d2d2d',
-    padding: 5,
-    borderRadius: 5,
-  },
-  text: {
-    fontSize: 30,
-    fontWeight: '500',
-    color: '#FFF',
-  }
 };
 
-
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  timeText: {
+    fontSize: 32,
+    fontWeight: '600',
+    color: '#FFF',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginBottom: 0,
+  },
+  controls: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  controlBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#2f2f2f',
+  },
+});
 
 export default StopWatch;

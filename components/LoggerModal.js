@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import Modal from 'react-native-modal';
-import { useSQLiteContext } from "expo-sqlite/next";
+import { useDatabase } from "../context/DatabaseContext";
 import Icon from "react-native-vector-icons/Ionicons";
 
 const getCurrentDate = () => {
@@ -18,25 +18,30 @@ const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, 
     const [weights, setWeights] = useState('');
     const [reps, setReps] = useState('');
 
-    const db = useSQLiteContext();
+    const db = useDatabase();
 
     useEffect(() => {
         const fetchExistingLog = async () => {
-            if(selectedExerciseLogId){
-                const result = await db.getAllAsync(
-                    'SELECT * FROM Logs WHERE id = ?',
-                    [selectedExerciseLogId]
-                );
-                setDate(result[0].date);
-                setSets(result[0].sets);
-                setWeights(result[0].weights);
-                setReps(result[0].reps)               
+          if (selectedExerciseLogId) {
+            try {
+              const result = await db.executeQuery(
+                'SELECT * FROM Logs WHERE id = ?',
+                [selectedExerciseLogId]
+              );
+              setDate(result[0].date);
+              setSets(result[0].sets);
+              setWeights(result[0].weights);
+              setReps(result[0].reps);
+            } catch (e) {
+              console.log('Error fetching log:', e);
             }
+          }
         }
+        
         if (modalVisible) {
-            fetchExistingLog();
+          fetchExistingLog();
         }
-    }, [modalVisible, selectedExerciseLogId])
+    }, [modalVisible, selectedExerciseLogId]);
 
     const fieldsValidation = (text, setter) => {
         if(/^[0-9\/]*$/.test(text)){
@@ -52,44 +57,40 @@ const LoggerModal = ({ modalVisible, setModalVisible, exerciseId, exerciseName, 
     }
 
     const handleSaveNewLog = async () => {
-        try{
-            await db.runAsync(
-                'INSERT INTO Logs (exercise_id, date, weights, sets, reps) VALUES (?, ?, ?, ?, ?)',
-                [exerciseId, date, weights, sets, reps]
-            );
-            await getExerciseLogs(exerciseId);
-            resetFields();
-            setModalVisible(false);
-        }catch(error){
-            console.log('Error saving Log', error);
+        try {
+          await db.executeRun(
+            'INSERT INTO Logs (exercise_id, date, weights, sets, reps) VALUES (?, ?, ?, ?, ?)',
+            [exerciseId, date, weights, sets, reps]
+          );
+          await getExerciseLogs(exerciseId);
+          resetFields();
+          setModalVisible(false);
+        } catch (error) {
+          console.log('Error saving Log', error);
         }
     }
-
+      
     const handleDeleteLog = async () => {
-        try{
-            await db.withTransactionAsync(async () => {
-                await db.runAsync('DELETE FROM Logs WHERE id = ?', [selectedExerciseLogId]);
-            });
+        try {
+            await db.executeRun('DELETE FROM Logs WHERE id = ?', [selectedExerciseLogId]);
             await getExerciseLogs(exerciseId);
             resetFields();
             setModalVisible(false);
-        }catch(e){
+        } catch (e) {
             console.log('Error deleting Log: ', e);
         }
     }
-
+      
     const handleSaveEdit = async () => {
-        try{
-            await db.withTransactionAsync(async () => {
-                await db.runAsync(
-                    'UPDATE Logs SET date = ?, weights = ?, sets = ?, reps = ? WHERE id = ?',
-                    [date, weights, sets, reps, selectedExerciseLogId]
-                );
-            });
+        try {
+            await db.executeRun(
+                'UPDATE Logs SET date = ?, weights = ?, sets = ?, reps = ? WHERE id = ?',
+                [date, weights, sets, reps, selectedExerciseLogId]
+          );
             await getExerciseLogs(exerciseId);
             resetFields();
             setModalVisible(false);
-        }catch(e){
+        } catch (e) {
             console.log('Error saving the edited Log: ', e);
         }
     }

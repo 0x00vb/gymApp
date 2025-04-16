@@ -1,41 +1,38 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from "@react-navigation/native";
-import Icon from 'react-native-vector-icons/Ionicons'
-const Menubar = () => {
-    const navigation = useNavigation();
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { navigationRef } from '../App'; // <- use the same ref
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-    return(
+const Menubar = ({ currentRoute }) => {
+    const iconColor = (screenName) => screenName === currentRoute ? '#3C83F6' : '#f1f1f1';
+
+    return (
         <View style={styles.menubarContainer}>
-            <TouchableOpacity onPress={() => navigation.navigate('Workouts')}>
-                <Icon name="barbell" size={38} color={'#f1f1f1'}/>
+            <TouchableOpacity onPress={() => navigationRef.navigate('Workouts')}>
+                <Icon name="dumbbell" size={30} color={iconColor('Workouts')} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Stats')}>
-                <Icon name="stats-chart" size={38} color={'#f1f1f1'}/>
+            <TouchableOpacity onPress={() => navigationRef.navigate('Stats')}>
+                <Icon name="chart-timeline-variant" size={30} color={iconColor('Stats')} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('GymsMap')}>
-                <Icon name="map" size={38} color={'#f1f1f1'}/>
+            <TouchableOpacity onPress={() => navigationRef.navigate('GymsMap')}>
+                <Icon name="calendar-blank-outline" size={30} color={iconColor('GymsMap')} />
             </TouchableOpacity>
         </View>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
-    menubarContainer:{
+    menubarContainer: {
         position: 'absolute',
-        bottom: 20,
-        backgroundColor: '#2d2a2ad8',
-        width: 'auto',
-        height: 45,
-        borderRadius: 40,
-        alignSelf: 'center',
+        bottom: 0,
+        backgroundColor: '#27272a',
+        width: '100%',
+        height: '9%',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'space-evenly',
         flexDirection: 'row',
         paddingHorizontal: 15,
-        gap: 20
     }
-
-})
+});
 
 export default Menubar;

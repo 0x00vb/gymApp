@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, TouchableWithoutFeedback } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
 import useDeleteButtonAnimation from "../hooks/useDeleteButtonAnimation";
 import Icon from "react-native-vector-icons/Ionicons";
 
 
 import Topbar from "../components/Topbar";
 import ModalInput from '../components/ModalInput'
-import { useSQLiteContext } from "expo-sqlite/next";
+import { useDatabase } from "../context/DatabaseContext";
 
 
 const WorkoutLogger = (props) => {
@@ -20,76 +21,84 @@ const WorkoutLogger = (props) => {
 
     const { longPressed, setLongPressed, animationProgress, showDeleteButton, hideDeleteButton } = useDeleteButtonAnimation();
 
-    const db = useSQLiteContext();
+    const db = useDatabase();
 
     useEffect(() => {
-        db.withTransactionAsync(async () => {
-            await getWorkoutDays();
-        })
+        getWorkoutDays();
     }, [])
     
     const getWorkoutDays = async () => {
-        const response = await db.getAllAsync('SELECT * FROM WorkoutDays WHERE workout_splits_id = ?', [workoutSplit_id]);
-        setWorkoutDays(response);
-    }
-
+        try {
+          const response = await db.executeQuery('SELECT * FROM WorkoutDays WHERE workout_splits_id = ?', [workoutSplit_id]);
+          setWorkoutDays(response);
+        } catch (e) {
+          console.log('Error fetching workout days:', e);
+        }
+      }
     const toggleModal = () => {
         setModalVisible(true);
     }
 
     const hanldeAddDay = async () => {
-        try{
-            await db.withTransactionAsync(async () => {
-                await db.runAsync('INSERT INTO WorkoutDays (workout_splits_id, workout_day_name) VALUES (?, ?)', [workoutSplit_id, dayInput])
-            });
-            await getWorkoutDays();
-            setDayInput("")
-            setModalVisible(false);
-        }catch(e){
-            console.log(e);
+        try {
+          await db.executeRun('INSERT INTO WorkoutDays (workout_splits_id, workout_day_name) VALUES (?, ?)', [workoutSplit_id, dayInput]);
+          await getWorkoutDays();
+          setDayInput("");
+          setModalVisible(false);
+        } catch (e) {
+          console.log('Error adding workout day:', e);
         }
-    }
-
+      }
+      
     const removeWorkoutDay = async (workoutDayId) => {
-        try{
-            await db.withTransactionAsync(async () => {
-                // Delete exercises associated with the workout day
-                await db.runAsync('DELETE FROM Exercises WHERE workout_day_id = ?', [workoutDayId]);
-                // Delete logs associated with the workout day (based on the exercises)
-                await db.runAsync('DELETE FROM Logs WHERE exercise_id IN (SELECT id FROM Exercises WHERE workout_day_id = ?)', [workoutDayId]);
-                // Delete the workout day itself
-                await db.runAsync('DELETE FROM WorkoutDays WHERE id = ?', [workoutDayId]);
+        try {
+            await db.withTransaction(async (execute) => {
+            // Delete logs associated with the workout day (based on the exercises)
+            await execute('DELETE FROM Logs WHERE exercise_id IN (SELECT id FROM Exercises WHERE workout_day_id = ?)', [workoutDayId]);
+            // Delete exercises associated with the workout day
+            await execute('DELETE FROM Exercises WHERE workout_day_id = ?', [workoutDayId]);
+            // Delete the workout day itself
+            await execute('DELETE FROM WorkoutDays WHERE id = ?', [workoutDayId]);
             });
             await getWorkoutDays();
             setLongPressed(null);
-        }catch(e){
+        } catch (e) {
             console.log("Error removing workoutDay: ", e);
         }
     }
-
     return(
         <TouchableWithoutFeedback onPress={hideDeleteButton}>
-            <View>
+            <View style={{flex: 1, backgroundColor: '#01050e'}}>
                 <Topbar title={title} style={{flex: 1}}/>
                 <ScrollView contentContainerStyle={styles.workoutsList}>
                     {
                         workoutDays.map((item, index) => (
                             <TouchableOpacity
-                                style={styles.workoutCard}
-                                activeOpacity={0.6}
-                                onPress={() => navigation.navigate('WorkoutLogger', {title: title, subtitle: item.workout_day_name, workoutDay_id: item.id})}
-                                onLongPress={() => showDeleteButton(index)}
-                                key={item.id}>
+                            activeOpacity={0.6}
+                            onPress={() => navigation.navigate('WorkoutLogger', {
+                                title: title,
+                                subtitle: item.workout_day_name,
+                                workoutDay_id: item.id
+                            })}
+                            onLongPress={() => showDeleteButton(index)}
+                            key={item.id}
+                            style={styles.workoutCard}
+                        >
+                            
+
                                 <Text style={styles.workoutTitle}>{item.workout_day_name}</Text>
-                                <Animated.View style={[styles.trashIconContainer, {right: longPressed == index ? animationProgress : -100}]}>
+                                <Animated.View style={[
+                                    styles.trashIconContainer,
+                                    { right: longPressed == index ? animationProgress : -100 }
+                                ]}>
                                     <TouchableOpacity
                                         onPress={() => removeWorkoutDay(item.id)}
                                         activeOpacity={0.9}
                                     >
-                                        <Icon name='trash' size={28} color={'#D9D9D9'}/>
+                                        <Icon name='trash' size={28} color={'#D9D9D9'} />
                                     </TouchableOpacity>
                                 </Animated.View>
-                            </TouchableOpacity>
+                        </TouchableOpacity>
                         ))
                     }
                     {/* -------  */}
@@ -98,7 +107,7 @@ const WorkoutLogger = (props) => {
                     </TouchableOpacity>
                 </ScrollView>
                 <ModalInput
-                    title={'Add Day'}
+                    title={'Add a new Workout day'}
                     buttonText={'Save Day'}
                     setText={setDayInput}
                     inputValue={dayInput}
@@ -121,30 +130,31 @@ const styles = StyleSheet.create({
         flexGrow: 1
     },
     workoutCard: {
+        backgroundColor: '#121212',
         width: 340,
         minHeight: 60,
         height: 'auto',
-        backgroundColor: '#D9D9D9',
         borderRadius: 10,
         justifyContent: 'center',
-        
         gap: 3,
-        shadowColor: '#000000',
+        shadowColor: 'rgba(60, 131, 246, 0.79)',
         shadowOffset: { width: 0, height: 4 },
         shadowRadius: 4,
         shadowOpacity: 0.30,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.05)',
     },
     workoutTitle: {
         fontSize: 22,
         fontWeight: '600',
-        marginLeft: 15
-
+        marginLeft: 15,
+        color: '#fdfdfd'
     },
     addDay: {
         width: 340,
         height: 45,
-        backgroundColor: '#228CDB',
+        backgroundColor: '#3C83F6',
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
